@@ -2,8 +2,12 @@
 
 import { useEffect, useRef, useState, useMemo, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { loadMockData, STAR_INSIGHTS, CLUSTER_INSIGHTS, CROSS_INSIGHTS } from '@/lib/mock-data';
+import {
+  loadMockData, STAR_INSIGHTS, CLUSTER_INSIGHTS, CROSS_INSIGHTS,
+  DEEP_PERSONALITY, ACHIEVEMENT_BADGES, MONTHLY_INSIGHTS, PERSONALITY_KEYWORDS,
+} from '@/lib/mock-data';
 import type { MockResult, UniverseStar, ClusterCenter } from '@/lib/types';
+import { CATEGORIES } from '@/lib/types';
 import UniverseCanvas from '@/components/universe/UniverseCanvas';
 import BottomSheet, { StarSheetContent, ClusterSheetContent } from '@/components/universe/BottomSheet';
 import InsightToast from '@/components/universe/InsightToast';
@@ -38,7 +42,6 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
       life: number; dec: number;
     }[] = [];
 
-    // Many more particles, brighter, larger
     for (let i = 0; i < 150; i++) {
       const a = Math.random() * Math.PI * 2;
       const sp = Math.random() * 1.2 + 0.2;
@@ -59,7 +62,6 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
       cx!.fillStyle = 'rgba(6,8,26,0.03)';
       cx!.fillRect(0, 0, w, h);
 
-      // Central glow
       const cg = cx!.createRadialGradient(mx, my, 0, mx, my, 80);
       cg.addColorStop(0, 'rgba(155,124,201,.06)');
       cg.addColorStop(1, 'transparent');
@@ -76,7 +78,6 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
         p.y += p.vy;
         p.life -= p.dec;
 
-        // Larger, brighter glow
         const g = cx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * p.life * 8);
         g.addColorStop(0, `rgba(${p.cr},${p.cg},${p.cb},${p.life * 0.4})`);
         g.addColorStop(0.4, `rgba(${p.cr},${p.cg},${p.cb},${p.life * 0.1})`);
@@ -86,7 +87,6 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
         cx!.arc(p.x, p.y, p.r * p.life * 8, 0, Math.PI * 2);
         cx!.fill();
 
-        // White core
         cx!.fillStyle = `rgba(255,255,255,${p.life * 0.6})`;
         cx!.beginPath();
         cx!.arc(p.x, p.y, p.r * p.life * 0.4, 0, Math.PI * 2);
@@ -125,6 +125,398 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
   );
 }
 
+// ===== Universe DNA Panel =====
+function UniverseDNA({
+  data, open, onClose,
+}: {
+  data: MockResult;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const groups = useMemo(() => {
+    const g: Record<string, number> = {};
+    data.posts.forEach(p => { g[p.cat.name] = (g[p.cat.name] || 0) + 1; });
+    return Object.entries(g)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({
+        name,
+        count,
+        pct: Math.round(count / data.posts.length * 100),
+        cat: CATEGORIES.find(c => c.name === name) || CATEGORIES[2],
+      }));
+  }, [data]);
+
+  // Time distribution
+  const timeDist = useMemo(() => {
+    const bins = { dawn: 0, morning: 0, afternoon: 0, evening: 0 };
+    data.posts.forEach(p => {
+      if (p.hour < 6) bins.dawn++;
+      else if (p.hour < 12) bins.morning++;
+      else if (p.hour < 18) bins.afternoon++;
+      else bins.evening++;
+    });
+    const total = data.posts.length;
+    return [
+      { label: '새벽', pct: Math.round(bins.dawn / total * 100), emoji: '🌃', color: '#6366f1' },
+      { label: '오전', pct: Math.round(bins.morning / total * 100), emoji: '🌅', color: '#f59e0b' },
+      { label: '오후', pct: Math.round(bins.afternoon / total * 100), emoji: '☀️', color: '#ec4899' },
+      { label: '저녁', pct: Math.round(bins.evening / total * 100), emoji: '🌙', color: '#8b5cf6' },
+    ];
+  }, [data]);
+
+  // Achievements
+  const badges = useMemo(() => {
+    const evPct = Math.round(data.posts.filter(p => p.hour >= 19).length / data.posts.length * 100);
+    const mornPct = Math.round(data.posts.filter(p => p.hour >= 6 && p.hour < 12).length / data.posts.length * 100);
+    const earned: typeof ACHIEVEMENT_BADGES = [];
+
+    ACHIEVEMENT_BADGES.forEach(b => {
+      if (b.condition === 'evening70' && evPct >= 70) earned.push(b);
+      if (b.condition === 'morning40' && mornPct >= 40) earned.push(b);
+      if (b.condition === 'category7' && data.categoryCount >= 7) earned.push(b);
+      if (b.condition === 'likes500' && data.topLikes >= 500) earned.push(b);
+      if (b.condition === 'streak60' && data.streakDays >= 60) earned.push(b);
+      if (b.condition === 'topcat50') {
+        const topPct = Math.round(groups[0].count / data.posts.length * 100);
+        if (topPct >= 50) earned.push(b);
+      }
+    });
+
+    return earned;
+  }, [data, groups]);
+
+  // Cross insights
+  const crossInsights = useMemo(() => {
+    const catNames = groups.map(g => g.name);
+    return CROSS_INSIGHTS.filter(ci =>
+      catNames.includes(ci.cats[0]) && catNames.includes(ci.cats[1])
+    ).slice(0, 3);
+  }, [groups]);
+
+  // Deep personality
+  const personality = useMemo(() => {
+    const kws = PERSONALITY_KEYWORDS[data.topCategory] || PERSONALITY_KEYWORDS['일상'];
+    const deep = DEEP_PERSONALITY[data.topCategory] || DEEP_PERSONALITY['일상'];
+    return { keywords: kws, insights: deep };
+  }, [data]);
+
+  // Monthly insight
+  const monthlyInsight = useMemo(() => {
+    return MONTHLY_INSIGHTS[Math.floor(Math.random() * MONTHLY_INSIGHTS.length)];
+  }, []);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[180] overflow-y-auto" style={{
+      background: 'rgba(6,8,26,.97)',
+      WebkitOverflowScrolling: 'touch',
+    }}>
+      <div className="mx-auto" style={{ maxWidth: 380, padding: '20px 22px 80px' }}>
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="cursor-pointer mb-4"
+          style={{
+            fontSize: '.85rem', fontWeight: 300, color: 'rgba(240,237,246,.35)',
+            background: 'none', border: 'none', padding: '8px 0',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          &larr; 우주로 돌아가기
+        </button>
+
+        {/* Header */}
+        <p className="font-brand italic" style={{
+          fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase',
+          color: 'rgba(155,124,201,.4)', marginBottom: 8,
+        }}>
+          universe dna
+        </p>
+        <h2 className="font-brand italic font-normal mb-1" style={{
+          fontSize: '1.6rem', color: 'rgba(240,237,246,.85)',
+        }}>
+          {data.userType.type}
+        </h2>
+        <p className="mb-5" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(155,124,201,.45)' }}>
+          {data.userType.rare} 유형
+        </p>
+
+        {/* Personality Keywords */}
+        <div className="flex flex-wrap gap-1.5 mb-6">
+          {personality.keywords.map((kw, i) => (
+            <span key={i} className="rounded-full" style={{
+              fontSize: '.75rem', fontWeight: 300, padding: '5px 14px',
+              background: 'rgba(155,124,201,.06)', border: '1px solid rgba(155,124,201,.1)',
+              color: 'rgba(240,237,246,.55)',
+            }}>
+              {kw}
+            </span>
+          ))}
+        </div>
+
+        {/* ===== Category Breakdown ===== */}
+        <div className="rounded-2xl mb-5" style={{
+          padding: '20px', background: 'rgba(255,255,255,.012)',
+          border: '1px solid rgba(255,255,255,.05)',
+        }}>
+          <p className="font-brand italic mb-4" style={{
+            fontSize: '.82rem', color: 'rgba(155,124,201,.5)', letterSpacing: '.06em',
+          }}>
+            우주 구성
+          </p>
+          <div className="flex flex-col gap-3">
+            {groups.map((g, i) => (
+              <div key={g.name}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full" style={{
+                      width: 7, height: 7, background: g.cat.hex,
+                      boxShadow: `0 0 6px ${g.cat.hex}60`,
+                    }} />
+                    <span style={{ fontSize: '.85rem', fontWeight: 300, color: 'rgba(240,237,246,.65)' }}>
+                      {g.name}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(240,237,246,.4)' }}>
+                    {g.pct}% · {g.count}개
+                  </span>
+                </div>
+                <div className="w-full rounded-full" style={{ height: 3, background: 'rgba(255,255,255,.04)' }}>
+                  <div className="rounded-full" style={{
+                    width: `${g.pct}%`, height: '100%',
+                    background: `linear-gradient(to right, ${g.cat.hex}60, ${g.cat.hex})`,
+                    transition: 'width 1s ease-out',
+                  }} />
+                </div>
+                {i === 0 && (
+                  <p className="mt-2 font-light" style={{
+                    fontSize: '.8rem', color: 'rgba(240,237,246,.4)', lineHeight: 1.6,
+                  }}>
+                    {CLUSTER_INSIGHTS[g.name] || ''}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ===== Time Pattern Analysis ===== */}
+        <div className="rounded-2xl mb-5" style={{
+          padding: '20px', background: 'rgba(255,255,255,.012)',
+          border: '1px solid rgba(255,255,255,.05)',
+        }}>
+          <p className="font-brand italic mb-4" style={{
+            fontSize: '.82rem', color: 'rgba(155,124,201,.5)', letterSpacing: '.06em',
+          }}>
+            시간 패턴 분석
+          </p>
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {timeDist.map((t, i) => (
+              <div key={i} className="text-center rounded-lg" style={{
+                padding: '12px 4px',
+                background: t.pct === Math.max(...timeDist.map(d => d.pct)) ? `${t.color}12` : 'rgba(255,255,255,.015)',
+                border: t.pct === Math.max(...timeDist.map(d => d.pct)) ? `1px solid ${t.color}25` : '1px solid rgba(255,255,255,.04)',
+              }}>
+                <div style={{ fontSize: '1.1rem', marginBottom: 2 }}>{t.emoji}</div>
+                <div className="font-brand" style={{ fontSize: '1rem', color: t.color }}>{t.pct}%</div>
+                <div style={{ fontSize: '.62rem', fontWeight: 300, color: 'rgba(240,237,246,.35)' }}>{t.label}</div>
+              </div>
+            ))}
+          </div>
+          <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(240,237,246,.5)', lineHeight: 1.7 }}>
+            {monthlyInsight}
+          </p>
+        </div>
+
+        {/* ===== Cross-Category Insights ===== */}
+        {crossInsights.length > 0 && (
+          <div className="rounded-2xl mb-5" style={{
+            padding: '20px',
+            background: 'linear-gradient(165deg, rgba(100,180,240,.03), rgba(155,124,201,.04))',
+            border: '1px solid rgba(100,180,240,.08)',
+          }}>
+            <p className="font-brand italic mb-4" style={{
+              fontSize: '.82rem', color: 'rgba(100,180,240,.5)', letterSpacing: '.06em',
+            }}>
+              교차 패턴 발견
+            </p>
+            <div className="flex flex-col gap-4">
+              {crossInsights.map((ci, i) => (
+                <div key={i}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {ci.cats.map((cat, j) => {
+                      const c = CATEGORIES.find(cc => cc.name === cat);
+                      return (
+                        <span key={j} className="flex items-center gap-1 rounded-full" style={{
+                          fontSize: '.72rem', fontWeight: 300, padding: '3px 10px',
+                          background: `${c?.hex || '#b48ce6'}10`, color: `${c?.hex || '#b48ce6'}99`,
+                          border: `1px solid ${c?.hex || '#b48ce6'}20`,
+                        }}>
+                          <span className="rounded-full" style={{ width: 5, height: 5, background: c?.hex || '#b48ce6' }} />
+                          {cat}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.55)', lineHeight: 1.7 }}>
+                    {ci.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ===== Deep Personality ===== */}
+        <div className="rounded-2xl mb-5" style={{
+          padding: '20px',
+          background: 'linear-gradient(165deg, rgba(155,124,201,.06), rgba(100,140,220,.03))',
+          border: '1px solid rgba(155,124,201,.1)',
+        }}>
+          <p className="font-brand italic mb-4" style={{
+            fontSize: '.82rem', color: 'rgba(155,124,201,.55)', letterSpacing: '.06em',
+          }}>
+            AI 성격 심층 분석
+          </p>
+          <p className="font-light leading-relaxed mb-4" style={{
+            fontSize: '.95rem', color: 'rgba(240,237,246,.7)', lineHeight: 1.9,
+          }}>
+            {data.userType.insight}
+          </p>
+          <div className="flex flex-col gap-3">
+            {personality.insights.map((insight, i) => (
+              <div key={i} className="rounded-xl" style={{
+                padding: '14px 16px',
+                background: 'rgba(255,255,255,.015)',
+                borderLeft: `2px solid rgba(155,124,201,${0.2 - i * 0.05})`,
+              }}>
+                <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.6)', lineHeight: 1.7 }}>
+                  {insight}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ===== Achievement Badges ===== */}
+        {badges.length > 0 && (
+          <div className="rounded-2xl mb-5" style={{
+            padding: '20px', background: 'rgba(255,255,255,.012)',
+            border: '1px solid rgba(255,255,255,.05)',
+          }}>
+            <p className="font-brand italic mb-4" style={{
+              fontSize: '.82rem', color: 'rgba(155,124,201,.5)', letterSpacing: '.06em',
+            }}>
+              획득한 우주 뱃지
+            </p>
+            <div className="flex flex-col gap-2.5">
+              {badges.map((b, i) => (
+                <div key={i} className="flex items-center gap-3 rounded-xl" style={{
+                  padding: '14px 16px',
+                  background: 'rgba(155,124,201,.03)',
+                  border: '1px solid rgba(155,124,201,.08)',
+                }}>
+                  <span style={{ fontSize: '1.3rem' }}>{b.icon}</span>
+                  <div>
+                    <p style={{ fontSize: '.88rem', fontWeight: 400, color: 'rgba(240,237,246,.7)' }}>{b.title}</p>
+                    <p style={{ fontSize: '.75rem', fontWeight: 300, color: 'rgba(240,237,246,.35)' }}>{b.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ===== Summary Message ===== */}
+        <div className="rounded-2xl text-center" style={{
+          padding: '28px 20px',
+          background: 'linear-gradient(170deg, rgba(155,124,201,.04), rgba(100,180,240,.03))',
+          border: '1px solid rgba(155,124,201,.08)',
+        }}>
+          <p className="font-brand italic font-normal mb-3" style={{
+            fontSize: '1.15rem', color: 'rgba(240,237,246,.7)',
+          }}>
+            당신의 우주는 계속 확장 중이에요
+          </p>
+          <p className="font-light" style={{
+            fontSize: '.88rem', color: 'rgba(240,237,246,.45)', lineHeight: 1.7,
+          }}>
+            {data.posts.length}개의 별이 말하는 건 결국 하나예요.<br />
+            <span style={{ color: 'rgba(155,124,201,.6)' }}>당신은 꽤 괜찮은 사람이라는 것.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== Star Exploration Tracker =====
+function ExploreProgress({
+  tapped,
+  total,
+  onDNAClick,
+}: {
+  tapped: number;
+  total: number;
+  onDNAClick: () => void;
+}) {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (tapped >= 1) setShow(true);
+  }, [tapped]);
+
+  if (!show) return null;
+
+  const pct = Math.min(Math.round(tapped / total * 100), 100);
+  const showDNA = tapped >= 3;
+
+  return (
+    <div className="fixed left-4 right-4 z-[104]" style={{ bottom: 16 }}>
+      <div className="mx-auto rounded-2xl" style={{
+        maxWidth: 340,
+        padding: '12px 16px',
+        background: 'rgba(12,14,32,.94)',
+        backdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255,255,255,.06)',
+      }}>
+        <div className="flex items-center justify-between mb-2">
+          <span style={{ fontSize: '.75rem', fontWeight: 300, color: 'rgba(240,237,246,.4)' }}>
+            탐험한 별 {tapped}/{total}
+          </span>
+          <span className="font-brand" style={{ fontSize: '.82rem', color: 'rgba(155,124,201,.5)' }}>
+            {pct}%
+          </span>
+        </div>
+        <div className="w-full rounded-full mb-2" style={{ height: 2.5, background: 'rgba(255,255,255,.06)' }}>
+          <div className="rounded-full" style={{
+            width: `${pct}%`, height: '100%',
+            background: 'linear-gradient(to right, rgba(155,124,201,.4), rgba(155,124,201,.7))',
+            transition: 'width .6s ease-out',
+          }} />
+        </div>
+        {showDNA && (
+          <button
+            onClick={onDNAClick}
+            className="w-full text-center cursor-pointer rounded-lg mt-1 active:scale-[.98]"
+            style={{
+              padding: '9px',
+              fontSize: '.82rem', fontWeight: 300,
+              color: 'rgba(155,124,201,.6)',
+              background: 'rgba(155,124,201,.06)',
+              border: '1px solid rgba(155,124,201,.1)',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            우주 DNA 리포트 보기
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ===== Main Universe Page =====
 function UniverseContent() {
   const searchParams = useSearchParams();
@@ -135,6 +527,10 @@ function UniverseContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [toastsActive, setToastsActive] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showDNA, setShowDNA] = useState(false);
+
+  // Star exploration tracking
+  const [tappedStars, setTappedStars] = useState<Set<number>>(new Set());
 
   // Bottom sheet state
   const [bsOpen, setBsOpen] = useState(false);
@@ -155,10 +551,23 @@ function UniverseContent() {
     setToastsActive(true);
   }, []);
 
-  // Star tap handler
+  // Star tap handler - enriched with deeper insights
   const handleStarTap = useCallback((star: UniverseStar) => {
+    // Track tapped stars
+    setTappedStars(prev => {
+      const next = new Set(prev);
+      next.add(star.post.id);
+      return next;
+    });
+
     const catInsights = STAR_INSIGHTS[star.post.cat.name] || [''];
     const insight = catInsights[Math.floor(Math.random() * catInsights.length)];
+
+    // Deep insight for popular posts
+    const deepInsights = DEEP_PERSONALITY[star.post.cat.name] || [];
+    const bonusInsight = star.post.likes > 400 && deepInsights.length > 0
+      ? deepInsights[Math.floor(Math.random() * deepInsights.length)]
+      : null;
 
     setBsContent(
       <StarSheetContent
@@ -171,16 +580,33 @@ function UniverseContent() {
           cat: { name: star.post.cat.name, hex: star.post.cat.hex },
         }}
         insight={insight}
+        bonusInsight={bonusInsight}
+        starRank={star.post.likes > 600 ? 'brightest' : star.post.likes > 300 ? 'bright' : undefined}
       />
     );
     setBsOpen(true);
   }, []);
 
-  // Cluster tap handler
+  // Cluster tap handler - enriched
   const handleClusterTap = useCallback((cluster: ClusterCenter, stars: UniverseStar[]) => {
     const avgLikes = Math.round(stars.reduce((sum, s) => sum + s.post.likes, 0) / cluster.count);
     const topLikes = Math.max(...stars.map(s => s.post.likes));
     const insight = CLUSTER_INSIGHTS[cluster.name] || '';
+
+    // Find cross insights involving this cluster
+    const catNames = stars.map(s => s.post.cat.name);
+    const crossInsight = CROSS_INSIGHTS.find(ci =>
+      ci.cats.includes(cluster.name)
+    );
+
+    // Time pattern for this cluster
+    const evPosts = stars.filter(s => s.post.hour >= 19).length;
+    const evPct = Math.round(evPosts / cluster.count * 100);
+    const timeNote = evPct > 60
+      ? `이 카테고리 게시물의 ${evPct}%가 저녁 이후에 집중. 감성이 깊어지는 시간에 더 활발해져요.`
+      : evPct < 30
+        ? `주로 낮 시간에 기록하는 카테고리. 활동적이고 의식적인 기록이에요.`
+        : `하루 전반에 걸쳐 고르게 분포. 일상적으로 자연스럽게 녹아있는 관심사.`;
 
     setBsContent(
       <ClusterSheetContent
@@ -191,12 +617,14 @@ function UniverseContent() {
         avgLikes={avgLikes}
         topLikes={topLikes}
         insight={insight}
+        crossInsight={crossInsight?.text}
+        timeNote={timeNote}
       />
     );
     setBsOpen(true);
   }, []);
 
-  // Toast items
+  // Toast items - more and richer
   const toastItems = useMemo(() => {
     if (!data) return [];
     const posts = data.posts;
@@ -216,9 +644,19 @@ function UniverseContent() {
       }
     }
 
+    // Personality keyword
+    const keywords = PERSONALITY_KEYWORDS[data.topCategory] || PERSONALITY_KEYWORDS['일상'];
+    const keywordText = `AI가 분석한 당신: "${keywords.slice(0, 2).join('" "')}"`;
+
+    // Top post insight
+    const topPost = posts.reduce((a, b) => a.likes > b.likes ? a : b, posts[0]);
+    const topPostText = `가장 빛나는 별: ♥ ${topPost.likes}. "${topPost.caption.substring(0, 25)}..."`;
+
     return [
+      { label: '성격 분석', text: keywordText },
       { label: '시간 패턴', text: `게시물의 ${evPct}%가 저녁 이후. 하루의 끝에서 감성이 피어나는 사람.` },
       { label: '교차 패턴', text: crossText },
+      { label: '빛나는 별', text: topPostText },
       { label: '우주 구성', text: `${data.categoryCount}가지 색깔의 우주. 다양한 면을 가진 사람이라는 뜻.` },
     ];
   }, [data]);
@@ -263,11 +701,20 @@ function UniverseContent() {
       </div>
 
       {/* Insight toasts */}
-      {phase === 'explore' && (
+      {phase === 'explore' && !showDNA && (
         <InsightToast
           items={toastItems}
           active={toastsActive}
           onShareClick={() => setShowShare(true)}
+        />
+      )}
+
+      {/* Star exploration progress */}
+      {phase === 'explore' && !bsOpen && !showDNA && tappedStars.size > 0 && (
+        <ExploreProgress
+          tapped={tappedStars.size}
+          total={data.posts.length}
+          onDNAClick={() => setShowDNA(true)}
         />
       )}
 
@@ -284,6 +731,13 @@ function UniverseContent() {
         topLikes={data.topLikes}
         categoryCount={data.categoryCount}
         streakDays={data.streakDays}
+      />
+
+      {/* Universe DNA Panel */}
+      <UniverseDNA
+        data={data}
+        open={showDNA}
+        onClose={() => setShowDNA(false)}
       />
     </div>
   );

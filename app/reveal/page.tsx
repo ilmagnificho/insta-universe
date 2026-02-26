@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState, Suspense } from 'react';
+import { useEffect, useRef, useState, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { loadMockData, FREE_INSIGHTS } from '@/lib/mock-data';
+import { loadMockData, FREE_INSIGHTS, PERSONALITY_KEYWORDS, EMOTION_TEASERS } from '@/lib/mock-data';
 import type { MockResult, PostData } from '@/lib/types';
 import { CATEGORIES } from '@/lib/types';
 
@@ -201,6 +201,94 @@ function MiniUniverse({ posts }: { posts: PostData[] }) {
   return <canvas ref={canvasRef} />;
 }
 
+// ===== Animated Counter =====
+function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: string }) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const dur = 1200;
+    const t0 = Date.now();
+    const step = () => {
+      const elapsed = Date.now() - t0;
+      const p = Math.min(elapsed / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      start = Math.round(target * eased);
+      setVal(start);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [target]);
+  return <>{val.toLocaleString()}{suffix}</>;
+}
+
+// ===== Time Distribution Bar =====
+function TimeDistBar({ posts }: { posts: PostData[] }) {
+  const dist = useMemo(() => {
+    const bins = { dawn: 0, morning: 0, afternoon: 0, evening: 0 };
+    posts.forEach(p => {
+      if (p.hour < 6) bins.dawn++;
+      else if (p.hour < 12) bins.morning++;
+      else if (p.hour < 18) bins.afternoon++;
+      else bins.evening++;
+    });
+    const total = posts.length;
+    return [
+      { label: '새벽', pct: Math.round(bins.dawn / total * 100), color: '#6366f1' },
+      { label: '오전', pct: Math.round(bins.morning / total * 100), color: '#f59e0b' },
+      { label: '오후', pct: Math.round(bins.afternoon / total * 100), color: '#ec4899' },
+      { label: '저녁', pct: Math.round(bins.evening / total * 100), color: '#8b5cf6' },
+    ];
+  }, [posts]);
+
+  const [animate, setAnimate] = useState(false);
+  useEffect(() => { setTimeout(() => setAnimate(true), 500); }, []);
+
+  return (
+    <div className="flex gap-1 w-full" style={{ height: 64 }}>
+      {dist.map((d, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1">
+          <div className="w-full rounded-t-sm" style={{
+            height: animate ? `${Math.max(d.pct * 0.55, 4)}px` : '2px',
+            background: `linear-gradient(to top, ${d.color}40, ${d.color}90)`,
+            transition: `height 1s ${i * 0.15}s cubic-bezier(.16,1,.3,1)`,
+          }} />
+          <span style={{ fontSize: '.6rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>{d.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ===== Personality Keyword Pills =====
+function PersonalityPills({ keywords, delay = 0 }: { keywords: string[]; delay?: number }) {
+  const [show, setShow] = useState(false);
+  useEffect(() => { setTimeout(() => setShow(true), delay); }, [delay]);
+
+  return (
+    <div className="flex flex-wrap gap-1.5 justify-center">
+      {keywords.map((kw, i) => (
+        <span
+          key={i}
+          className="rounded-full"
+          style={{
+            fontSize: '.75rem',
+            fontWeight: 300,
+            padding: '5px 14px',
+            background: 'rgba(155,124,201,.06)',
+            border: '1px solid rgba(155,124,201,.1)',
+            color: 'rgba(240,237,246,.55)',
+            opacity: show ? 1 : 0,
+            transform: show ? 'scale(1)' : 'scale(0.8)',
+            transition: `all .6s ${i * 0.12 + 0.1}s cubic-bezier(.16,1,.3,1)`,
+          }}
+        >
+          {kw}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 // ===== Main Reveal Page =====
 function RevealContent() {
   const router = useRouter();
@@ -208,18 +296,53 @@ function RevealContent() {
   const username = searchParams.get('username') || 'demo';
   const [data, setData] = useState<MockResult | null>(null);
   const [visible, setVisible] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stored = loadMockData();
     if (stored) setData(stored);
     setTimeout(() => setVisible(true), 150);
+    setTimeout(() => setShowDetail(true), 800);
   }, []);
 
   const handlePay = () => {
     router.push(`/universe/demo?username=${encodeURIComponent(username)}`);
   };
 
-  if (!data) {
+  // Derived data
+  const analysis = useMemo(() => {
+    if (!data) return null;
+    const posts = data.posts;
+    const groups: Record<string, number> = {};
+    posts.forEach(p => { groups[p.cat.name] = (groups[p.cat.name] || 0) + 1; });
+    const sorted = Object.entries(groups).sort((a, b) => b[1] - a[1]);
+    const topPct = Math.round(sorted[0][1] / posts.length * 100);
+    const secondCat = sorted.length > 1 ? sorted[1][0] : null;
+    const secondPct = sorted.length > 1 ? Math.round(sorted[1][1] / posts.length * 100) : 0;
+
+    // Time analysis
+    const evPosts = posts.filter(p => p.hour >= 19).length;
+    const evPct = Math.round(evPosts / posts.length * 100);
+    const peakHour = (() => {
+      const hourBins: number[] = Array(24).fill(0);
+      posts.forEach(p => hourBins[p.hour]++);
+      return hourBins.indexOf(Math.max(...hourBins));
+    })();
+
+    // Top liked post
+    const topPost = posts.reduce((a, b) => a.likes > b.likes ? a : b, posts[0]);
+
+    // Personality keywords
+    const keywords = PERSONALITY_KEYWORDS[data.topCategory] || PERSONALITY_KEYWORDS['일상'];
+
+    // Emotion teaser
+    const emotionTeaser = EMOTION_TEASERS[data.topCategory] || EMOTION_TEASERS['일상'];
+
+    return { sorted, topPct, secondCat, secondPct, evPct, peakHour, topPost, keywords, emotionTeaser };
+  }, [data]);
+
+  if (!data || !analysis) {
     return (
       <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#06081a' }}>
         <p style={{ fontSize: '0.95rem', color: 'rgba(240,237,246,.45)', fontWeight: 300 }}>로딩 중...</p>
@@ -229,9 +352,11 @@ function RevealContent() {
 
   const freeInsight = FREE_INSIGHTS[data.topCategory] || FREE_INSIGHTS['일상'];
   const starCount = data.posts.length;
+  const topCatColor = CATEGORIES.find(c => c.name === data.topCategory)?.hex || '#b48ce6';
 
   return (
     <div
+      ref={scrollRef}
       className="fixed inset-0 z-[120] overflow-y-auto"
       style={{
         background: 'radial-gradient(ellipse at 50% 20%, #0e1030, #06081a 65%)',
@@ -265,7 +390,7 @@ function RevealContent() {
         </h1>
 
         {/* Rarity badge */}
-        <div className="flex items-center gap-1.5 mb-5" style={{
+        <div className="flex items-center gap-1.5 mb-4" style={{
           padding: '4px 12px', borderRadius: 20,
           background: 'rgba(155,124,201,.08)',
           border: '1px solid rgba(155,124,201,.12)',
@@ -280,15 +405,43 @@ function RevealContent() {
           </span>
         </div>
 
+        {/* Personality Keywords */}
+        <div className="mb-5">
+          <PersonalityPills keywords={analysis.keywords} delay={600} />
+        </div>
+
         {/* Description */}
-        <p className="font-light leading-relaxed mb-8" style={{
+        <p className="font-light leading-relaxed mb-7" style={{
           fontSize: '0.95rem', color: 'rgba(240,237,246,.55)', lineHeight: 1.85,
         }}>
           {data.userType.description}
         </p>
 
-        {/* Free Insight Card */}
-        <div className="w-full rounded-2xl text-left mb-8" style={{
+        {/* ===== Top Category Spotlight ===== */}
+        <div className="w-full rounded-2xl text-left mb-5" style={{
+          padding: '20px 20px',
+          background: `linear-gradient(165deg, ${topCatColor}08, ${topCatColor}03)`,
+          border: `1px solid ${topCatColor}18`,
+        }}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="rounded-full" style={{ width: 8, height: 8, background: topCatColor, boxShadow: `0 0 8px ${topCatColor}60` }} />
+            <p style={{ fontSize: '.82rem', fontWeight: 400, color: topCatColor + 'cc' }}>
+              가장 큰 별자리
+            </p>
+          </div>
+          <p className="font-brand italic font-normal mb-1" style={{ fontSize: '1.3rem', color: 'rgba(240,237,246,.8)' }}>
+            {data.topCategory}
+          </p>
+          <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.45)', lineHeight: 1.7 }}>
+            우주의 <span style={{ color: topCatColor, fontWeight: 400 }}>{analysis.topPct}%</span>를 차지하고 있어요
+            {analysis.secondCat && (
+              <>, 뒤이어 <span style={{ color: 'rgba(240,237,246,.6)' }}>{analysis.secondCat}</span>이 {analysis.secondPct}%</>
+            )}
+          </p>
+        </div>
+
+        {/* ===== Free Insight Card ===== */}
+        <div className="w-full rounded-2xl text-left mb-5" style={{
           padding: '22px 20px',
           background: 'linear-gradient(165deg, rgba(155,124,201,.06), rgba(100,140,220,.03))',
           border: '1px solid rgba(155,124,201,.1)',
@@ -311,8 +464,31 @@ function RevealContent() {
           </p>
         </div>
 
+        {/* ===== Time Pattern Teaser ===== */}
+        <div className="w-full rounded-2xl text-left mb-5" style={{
+          padding: '20px 20px',
+          background: 'rgba(255,255,255,.012)',
+          border: '1px solid rgba(255,255,255,.05)',
+        }}>
+          <p className="font-brand italic mb-3" style={{
+            fontSize: '.82rem', color: 'rgba(155,124,201,.45)', letterSpacing: '.06em',
+          }}>
+            활동 시간대 분포
+          </p>
+          <TimeDistBar posts={data.posts} />
+          <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,.04)' }}>
+            <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(240,237,246,.5)', lineHeight: 1.7 }}>
+              게시물의 <span style={{ color: '#8b5cf6', fontWeight: 400 }}>{analysis.evPct}%</span>가 저녁 이후에 집중
+            </p>
+            <p className="mt-1 flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>
+              <span style={{ opacity: 0.5 }}>🔒</span>
+              이 패턴이 의미하는 것은...
+            </p>
+          </div>
+        </div>
+
         {/* ===== Blurred Universe Preview ===== */}
-        <div className="w-full rounded-2xl overflow-hidden relative mb-6" style={{
+        <div className="w-full rounded-2xl overflow-hidden relative mb-5" style={{
           aspectRatio: '1',
           background: '#06081a',
           border: '1px solid rgba(155,124,201,.06)',
@@ -333,32 +509,80 @@ function RevealContent() {
           </div>
         </div>
 
-        {/* Stats summary */}
-        <div className="w-full grid grid-cols-3 gap-2 mb-6">
+        {/* ===== Stats summary ===== */}
+        <div className="w-full grid grid-cols-4 gap-1.5 mb-5">
           {[
-            { n: `${starCount}`, l: '분석된 게시물' },
-            { n: `${data.categoryCount}`, l: '우주의 색깔' },
-            { n: data.userType.rare, l: '희소성' },
+            { n: starCount, l: '게시물' },
+            { n: data.categoryCount, l: '카테고리' },
+            { n: data.topLikes, l: '최고 ♥' },
+            { n: data.streakDays, l: '활동일' },
           ].map((s, i) => (
             <div key={i} className="rounded-xl text-center" style={{
-              padding: '12px 6px',
+              padding: '12px 4px',
               background: 'rgba(255,255,255,.015)',
               border: '1px solid rgba(255,255,255,.04)',
             }}>
-              <div className="font-brand" style={{ fontSize: '1.1rem', color: 'rgba(240,237,246,.65)' }}>
-                {s.n}
+              <div className="font-brand" style={{ fontSize: '1rem', color: 'rgba(240,237,246,.65)' }}>
+                {typeof s.n === 'number' ? <AnimatedNumber target={s.n} /> : s.n}
               </div>
-              <div style={{ fontSize: '.7rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>
+              <div style={{ fontSize: '.62rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>
                 {s.l}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Locked insights - creates FOMO */}
-        <div className="w-full mb-7">
+        {/* ===== Best Moment Teaser ===== */}
+        <div className="w-full rounded-2xl text-left mb-5" style={{
+          padding: '18px 20px',
+          background: 'rgba(255,255,255,.012)',
+          border: '1px solid rgba(255,255,255,.05)',
+        }}>
+          <div className="flex items-center justify-between mb-2">
+            <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(240,237,246,.45)' }}>
+              가장 빛났던 순간
+            </p>
+            <span style={{ fontSize: '.82rem', color: 'rgba(235,130,175,.5)' }}>
+              &#9829; <AnimatedNumber target={analysis.topPost.likes} />
+            </span>
+          </div>
+          <p className="font-light mb-2" style={{
+            fontSize: '.9rem', color: 'rgba(240,237,246,.6)', lineHeight: 1.7,
+          }}>
+            &ldquo;{analysis.topPost.caption.substring(0, 30)}{analysis.topPost.caption.length > 30 ? '...' : ''}&rdquo;
+          </p>
+          <p className="flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>
+            <span style={{ opacity: 0.5 }}>🔒</span>
+            이 게시물이 빛난 이유 &middot; AI 분석
+          </p>
+        </div>
+
+        {/* ===== Emotional Pattern Teaser ===== */}
+        <div className="w-full rounded-2xl text-left mb-5" style={{
+          padding: '18px 20px',
+          background: 'linear-gradient(165deg, rgba(100,180,240,.03), rgba(155,124,201,.04))',
+          border: '1px solid rgba(100,180,240,.08)',
+        }}>
+          <p className="font-brand italic mb-2" style={{
+            fontSize: '.82rem', color: 'rgba(100,180,240,.5)', letterSpacing: '.06em',
+          }}>
+            감정 패턴 프리뷰
+          </p>
+          <p className="font-light" style={{
+            fontSize: '.88rem', color: 'rgba(240,237,246,.5)', lineHeight: 1.7,
+          }}>
+            {analysis.emotionTeaser}
+          </p>
+          <p className="mt-2 flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.25)' }}>
+            <span style={{ opacity: 0.5 }}>🔒</span>
+            전체 감정 패턴 분석 보기
+          </p>
+        </div>
+
+        {/* ===== Locked insights - creates FOMO ===== */}
+        <div className="w-full mb-5">
           <p className="text-left mb-3" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(240,237,246,.4)' }}>
-            잠금 해제 시 공개될 인사이트
+            잠금 해제 시 공개될 콘텐츠
           </p>
           <div className="flex flex-col gap-2">
             {data.userType.locked.map((lock, i) => (
@@ -380,10 +604,40 @@ function RevealContent() {
             }}>
               <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
               <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.5)' }}>
-                인터랙티브 우주 탐색 + {starCount}개 별 인사이트
+                {starCount}개 별 하나하나의 AI 인사이트
+              </span>
+            </div>
+            <div className="flex items-center gap-3 text-left rounded-xl" style={{
+              padding: '14px 16px',
+              background: 'rgba(255,255,255,.015)',
+              border: '1px solid rgba(255,255,255,.05)',
+            }}>
+              <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
+              <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.5)' }}>
+                인터랙티브 우주 탐색 + 카테고리별 딥 분석
+              </span>
+            </div>
+            <div className="flex items-center gap-3 text-left rounded-xl" style={{
+              padding: '14px 16px',
+              background: 'rgba(155,124,201,.03)',
+              border: '1px solid rgba(155,124,201,.08)',
+            }}>
+              <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
+              <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(155,124,201,.5)' }}>
+                우주 성격 카드 + 공유 기능
               </span>
             </div>
           </div>
+        </div>
+
+        {/* ===== Social Proof ===== */}
+        <div className="w-full text-center mb-6" style={{
+          opacity: showDetail ? 1 : 0,
+          transition: 'opacity .8s',
+        }}>
+          <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.25)' }}>
+            지금까지 <span style={{ color: 'rgba(155,124,201,.5)' }}>2,847명</span>이 자신의 우주를 탐험했어요
+          </p>
         </div>
 
         {/* CTA Button - The hero action */}
@@ -391,12 +645,12 @@ function RevealContent() {
           onClick={handlePay}
           className="w-full rounded-xl cursor-pointer transition-all active:scale-[.98]"
           style={{
-            padding: '16px',
-            background: 'linear-gradient(135deg, rgba(155,124,201,.3), rgba(120,140,220,.25))',
-            border: '1px solid rgba(155,124,201,.25)',
-            boxShadow: '0 4px 30px rgba(155,124,201,.12)',
-            color: 'rgba(240,237,246,.9)',
-            fontSize: '1.05rem',
+            padding: '18px',
+            background: 'linear-gradient(135deg, rgba(155,124,201,.35), rgba(120,140,220,.3))',
+            border: '1px solid rgba(155,124,201,.3)',
+            boxShadow: '0 4px 30px rgba(155,124,201,.15), 0 0 60px rgba(155,124,201,.06)',
+            color: 'rgba(240,237,246,.95)',
+            fontSize: '1.08rem',
             fontWeight: 400,
             letterSpacing: '.02em',
             WebkitTapHighlightColor: 'transparent',
@@ -405,7 +659,11 @@ function RevealContent() {
           우주 잠금 해제 — ₩4,900
         </button>
 
-        <p className="mt-2.5" style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(240,237,246,.25)' }}>
+        <p className="mt-2" style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(240,237,246,.2)' }}>
+          카카오페이 · 카드 결제
+        </p>
+
+        <p className="mt-1.5" style={{ fontSize: '.68rem', fontWeight: 200, color: 'rgba(240,237,246,.15)' }}>
           결제 시뮬레이션 (바로 넘어갑니다)
         </p>
       </div>
