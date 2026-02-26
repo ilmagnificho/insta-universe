@@ -9,7 +9,7 @@ import {
 } from '@/lib/mock-data';
 import type { MockResult, UniverseStar, ClusterCenter } from '@/lib/types';
 import { CATEGORIES } from '@/lib/types';
-import UniverseCanvas from '@/components/universe/UniverseCanvas';
+import PlanetCarousel from '@/components/universe/PlanetCarousel';
 import BottomSheet, { StarSheetContent, ClusterSheetContent } from '@/components/universe/BottomSheet';
 import InsightToast from '@/components/universe/InsightToast';
 import ShareOverlay from '@/components/universe/ShareOverlay';
@@ -647,6 +647,7 @@ function UniverseContent() {
   const [toastsActive, setToastsActive] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showDNA, setShowDNA] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Star exploration tracking
   const [tappedStars, setTappedStars] = useState<Set<number>>(new Set());
@@ -677,6 +678,8 @@ function UniverseContent() {
   }, [isPaid]);
 
   const handlePayment = useCallback(() => {
+    setIsTransitioning(true);
+    setPhase('unlock');
     router.push(`/universe/demo?username=${encodeURIComponent(username)}&paid=true`);
   }, [router, username]);
 
@@ -819,14 +822,13 @@ function UniverseContent() {
       {/* Unlock animation phase (paid only) */}
       {phase === 'unlock' && isPaid && <UnlockAnimation onComplete={handleUnlockComplete} />}
 
-      {/* Universe canvas (always mounted, visible when exploring) */}
+      {/* Planet carousel (always mounted, visible when exploring) */}
       <div style={{ opacity: phase === 'explore' ? 1 : 0, transition: 'opacity 1s' }}>
-        <UniverseCanvas
+        <PlanetCarousel
           posts={data.posts}
           username={username}
           onStarTap={handleStarTap}
           onClusterTap={handleClusterTap}
-          initialZoomStar={true}
         />
       </div>
 
@@ -878,7 +880,7 @@ function UniverseContent() {
       )}
 
       {/* Star exploration progress */}
-      {phase === 'explore' && !bsOpen && !showDNA && tappedStars.size > 0 && (
+      {phase === 'explore' && !bsOpen && !showDNA && !isTransitioning && tappedStars.size > 0 && (
         <ExploreProgress
           tapped={tappedStars.size}
           total={data.posts.length}
@@ -888,7 +890,7 @@ function UniverseContent() {
       )}
 
       {/* Floating payment CTA (free mode only) */}
-      {!isPaid && (
+      {!isPaid && !isTransitioning && (
         <FloatingCTA
           visible={phase === 'explore' && !bsOpen}
           onPay={handlePayment}
