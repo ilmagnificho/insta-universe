@@ -16,20 +16,23 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = createServerClient();
+    const devMode = process.env.DEV_SKIP_PAYMENT === "true";
 
-    // Verify payment is confirmed
-    const { data: payment } = await supabase
-      .from("payments")
-      .select("status, username")
-      .eq("order_id", orderId)
-      .eq("status", "confirmed")
-      .single();
+    // Verify payment is confirmed (skip in dev mode)
+    if (!devMode) {
+      const { data: payment } = await supabase
+        .from("payments")
+        .select("status, username")
+        .eq("order_id", orderId)
+        .eq("status", "confirmed")
+        .single();
 
-    if (!payment) {
-      return NextResponse.json(
-        { error: "결제가 확인되지 않았습니다" },
-        { status: 403 }
-      );
+      if (!payment) {
+        return NextResponse.json(
+          { error: "결제가 확인되지 않았습니다" },
+          { status: 403 }
+        );
+      }
     }
 
     // Get raw posts
