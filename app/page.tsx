@@ -135,10 +135,15 @@ export default function LandingPage() {
   const router = useRouter();
 
   const handleSubmit = () => {
-    const cleaned = username.trim().replace(/^@/, '');
+    let cleaned = username.trim().replace(/^@/, '');
     if (!cleaned) {
       setError('인스타그램 아이디를 입력해주세요');
       return;
+    }
+    // Extract username from Instagram URL if provided
+    const urlMatch = cleaned.match(/(?:https?:\/\/)?(?:www\.)?instagram\.com\/([a-zA-Z0-9._]+)\/?/);
+    if (urlMatch) {
+      cleaned = urlMatch[1];
     }
     if (!/^[a-zA-Z0-9._]{1,30}$/.test(cleaned)) {
       setError('올바른 인스타그램 아이디를 입력해주세요');
@@ -248,7 +253,7 @@ export default function LandingPage() {
               value={username}
               onChange={e => { setUsername(e.target.value); setError(''); }}
               onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-              placeholder="인스타그램 아이디"
+              placeholder="아이디 또는 프로필 URL"
               autoComplete="off"
               spellCheck={false}
               className="w-full py-4 pl-10 pr-4 rounded-2xl outline-none font-light"
