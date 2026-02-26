@@ -359,14 +359,14 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
       s.clusters.forEach(cc => {
         ctx.save();
         ctx.textAlign = 'center';
-        const fs = Math.max(9, 11 / cam.zoom);
+        const fs = Math.max(10, 12 / cam.zoom);
         ctx.font = `italic 400 ${fs}px "Cormorant Garamond"`;
-        ctx.fillStyle = `rgba(${cc.cat.r},${cc.cat.g},${cc.cat.b},.25)`;
-        ctx.fillText(cc.name, cc.x, cc.y - Math.max(20, 32 / cam.zoom));
-        const fs2 = Math.max(6, 7 / cam.zoom);
-        ctx.font = `200 ${fs2}px "Noto Sans KR"`;
-        ctx.fillStyle = 'rgba(240,237,246,.08)';
-        ctx.fillText(cc.count + '개', cc.x, cc.y - Math.max(9, 17 / cam.zoom));
+        ctx.fillStyle = `rgba(${cc.cat.r},${cc.cat.g},${cc.cat.b},.4)`;
+        ctx.fillText(cc.name, cc.x, cc.y - Math.max(22, 34 / cam.zoom));
+        const fs2 = Math.max(7, 8 / cam.zoom);
+        ctx.font = `300 ${fs2}px "Noto Sans KR"`;
+        ctx.fillStyle = 'rgba(240,237,246,.18)';
+        ctx.fillText(cc.count + '개', cc.x, cc.y - Math.max(10, 19 / cam.zoom));
         ctx.restore();
       });
 
@@ -515,36 +515,36 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
       />
       {/* Category pills at top */}
       <div className="fixed top-0 left-0 right-0 z-[102] pointer-events-none"
-        style={{ background: 'linear-gradient(to bottom, rgba(6,8,26,.92) 40%, transparent)', padding: '10px 14px 20px' }}>
-        <div className="pointer-events-none" style={{ marginBottom: 5 }}>
-          <span className="font-brand italic" style={{ fontSize: '.7rem', color: 'rgba(240,237,246,.2)' }}>
-            <b className="not-italic font-normal" style={{ color: 'rgba(240,237,246,.35)' }}>@{username}</b>의 우주
+        style={{ background: 'linear-gradient(to bottom, rgba(6,8,26,.92) 40%, transparent)', padding: '12px 16px 22px' }}>
+        <div className="pointer-events-none" style={{ marginBottom: 7 }}>
+          <span className="font-brand italic" style={{ fontSize: '.85rem', color: 'rgba(240,237,246,.35)' }}>
+            <b className="not-italic font-normal" style={{ color: 'rgba(240,237,246,.55)' }}>@{username}</b>의 우주
           </span>
         </div>
-        <div className="flex gap-1 overflow-x-auto pointer-events-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+        <div className="flex gap-1.5 overflow-x-auto pointer-events-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
           {stateRef.current.clusters.map(cc => (
             <button
               key={cc.name}
               onClick={() => zoomToClusterRef.current(cc.name)}
-              className="flex items-center gap-1 flex-shrink-0 cursor-pointer active:bg-white/[.03]"
+              className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer active:bg-white/[.05]"
               style={{
-                fontSize: '.54rem', fontWeight: 200, color: 'rgba(240,237,246,.22)',
-                padding: '4px 9px', borderRadius: 20, whiteSpace: 'nowrap',
-                border: '1px solid rgba(255,255,255,.02)', background: 'rgba(255,255,255,.008)',
+                fontSize: '.72rem', fontWeight: 300, color: 'rgba(240,237,246,.4)',
+                padding: '5px 11px', borderRadius: 20, whiteSpace: 'nowrap',
+                border: '1px solid rgba(255,255,255,.05)', background: 'rgba(255,255,255,.02)',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              <span className="rounded-full flex-shrink-0" style={{ width: 5, height: 5, background: cc.cat.hex }} />
+              <span className="rounded-full flex-shrink-0" style={{ width: 6, height: 6, background: cc.cat.hex }} />
               {cc.name} {cc.pct}%
             </button>
           ))}
           <button
             onClick={resetCamera}
-            className="flex-shrink-0 cursor-pointer active:bg-white/[.03]"
+            className="flex-shrink-0 cursor-pointer active:bg-white/[.05]"
             style={{
-              fontSize: '.54rem', fontWeight: 200, color: 'rgba(240,237,246,.22)',
-              padding: '4px 9px', borderRadius: 20, whiteSpace: 'nowrap',
-              border: '1px solid rgba(255,255,255,.02)', background: 'rgba(255,255,255,.008)',
+              fontSize: '.72rem', fontWeight: 300, color: 'rgba(240,237,246,.4)',
+              padding: '5px 11px', borderRadius: 20, whiteSpace: 'nowrap',
+              border: '1px solid rgba(255,255,255,.05)', background: 'rgba(255,255,255,.02)',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
