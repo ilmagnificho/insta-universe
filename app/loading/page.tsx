@@ -10,7 +10,8 @@ function LoadingContent() {
   const searchParams = useSearchParams();
   const username = searchParams.get('username') || 'demo';
   const fillRef = useRef<HTMLDivElement>(null);
-  const [message, setMessage] = useState('세션을 준비하고 있어요...');
+  const [message, setMessage] = useState('Instagram에 연결하고 있어요...');
+  const [subMessage, setSubMessage] = useState('');
   const started = useRef(false);
 
   useEffect(() => {
@@ -28,79 +29,65 @@ function LoadingContent() {
 
     async function tryRealScraping() {
       try {
-        // 1. Create dev session (works when DEV_SKIP_PAYMENT=true)
-        animateProgress(15, 0.8);
+        // Single endpoint: Apify scrape + categorization (no Supabase needed)
+        animateProgress(40, 90);
+        setMessage('인스타그램 게시물을 수집하고 있어요...');
+        setSubMessage('공개 게시물을 분석 중 (1~2분 소요)');
 
-        const startRes = await fetch('/api/dev/start', {
+        const res = await fetch('/api/quick-analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username }),
         });
 
-        if (!startRes.ok) throw new Error('Dev mode unavailable');
-        const { orderId } = await startRes.json();
-
-        // 2. Scrape Instagram posts
-        setMessage('인스타그램 게시물을 수집하고 있어요...');
-        animateProgress(50, 60);
-
-        const scrapeRes = await fetch('/api/scrape', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, orderId }),
-        });
-
-        if (!scrapeRes.ok) {
-          const err = await scrapeRes.json();
-          throw new Error(err.error || 'Scraping failed');
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || `서버 오류 (${res.status})`);
         }
 
-        const scrapeData = await scrapeRes.json();
+        const { data } = await res.json();
 
-        // 3. Analyze with AI
-        setMessage(`${scrapeData.postCount}개의 게시물을 AI가 분석하고 있어요...`);
-        animateProgress(85, 30);
-
-        const analyzeRes = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId }),
-        });
-
-        if (!analyzeRes.ok) throw new Error('Analysis failed');
-        const { resultId } = await analyzeRes.json();
-
-        // 4. Done
+        // Success - store and navigate
         setMessage('우주가 완성되었어요!');
+        setSubMessage(`${data.posts.length}개의 별을 발견했어요`);
         animateProgress(100, 0.5);
-        setTimeout(() => router.replace(`/result/${resultId}`), 800);
-      } catch {
-        // Fall back to mock data
-        fallbackToMock();
+
+        storeMockData(data);
+        setTimeout(() => {
+          router.replace(`/reveal?username=${encodeURIComponent(username)}`);
+        }, 1000);
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : '알 수 없는 오류';
+        console.error('Real scraping failed:', errorMsg);
+
+        // Fall back to demo data
+        setSubMessage(`실제 데이터 로드 실패: ${errorMsg}`);
+        setTimeout(() => {
+          setMessage('샘플 데이터로 미리보기를 준비하고 있어요...');
+          setSubMessage('');
+          fallbackToMock();
+        }, 2000);
       }
     }
 
     function fallbackToMock() {
+      animateProgress(100, 3);
       const msgs = [
-        '게시물을 수집하고 있어요...',
         'AI가 감정 패턴을 분석하고 있어요...',
         '당신만의 우주를 만들고 있어요...',
       ];
-      setMessage(msgs[0]);
-      animateProgress(100, 4);
       let idx = 0;
-
       const interval = setInterval(() => {
-        idx++;
         if (idx < msgs.length) setMessage(msgs[idx]);
-      }, 1300);
+        idx++;
+      }, 1200);
 
       setTimeout(() => {
         clearInterval(interval);
         const data = generateMockResult(username);
         storeMockData(data);
         router.replace(`/reveal?username=${encodeURIComponent(username)}`);
-      }, 4200);
+      }, 3500);
     }
 
     tryRealScraping();
@@ -143,6 +130,16 @@ function LoadingContent() {
         }}>
           {message}
         </p>
+
+        {subMessage && (
+          <p className="mt-2 font-light text-center px-8" style={{
+            fontSize: '0.75rem',
+            color: 'rgba(248,244,255,.3)',
+            maxWidth: 320,
+          }}>
+            {subMessage}
+          </p>
+        )}
       </div>
     </div>
   );
