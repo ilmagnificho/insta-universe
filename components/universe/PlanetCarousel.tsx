@@ -61,29 +61,30 @@ export default function PlanetCarousel({ posts, username, onStarTap, onClusterTa
   }, []);
 
   return (
-    <div className="fixed inset-0" style={{ background: '#0c0818' }}>
+    <div className="fixed inset-0" style={{ background: '#08061a' }}>
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-[102]" style={{
-        background: 'linear-gradient(to bottom, rgba(12,8,24,.95) 50%, transparent)',
-        padding: '14px 20px 28px',
+        background: 'linear-gradient(to bottom, rgba(8,6,26,.98) 40%, transparent)',
+        padding: '14px 20px 32px',
       }}>
-        <span className="font-brand italic" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.4)' }}>
-          <b className="not-italic font-normal" style={{ color: 'rgba(248,244,255,.6)' }}>@{username}</b>의 우주
+        <span className="font-brand italic" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.35)' }}>
+          <b className="not-italic font-normal" style={{ color: 'rgba(248,244,255,.55)' }}>@{username}</b>의 우주
         </span>
-        <div className="flex gap-1.5 mt-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex gap-1.5 mt-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           {planets.map((p, i) => (
             <button key={p.name} onClick={() => scrollToIndex(i)}
               className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer"
               style={{
-                fontSize: '.72rem', fontWeight: 300, padding: '5px 11px', borderRadius: 20, whiteSpace: 'nowrap',
-                color: i === activeIndex ? 'rgba(248,244,255,.7)' : 'rgba(248,244,255,.35)',
-                border: i === activeIndex ? `1px solid ${p.cat.hex}30` : '1px solid rgba(210,160,200,.06)',
-                background: i === activeIndex ? `${p.cat.hex}12` : 'rgba(210,160,200,.03)',
+                fontSize: '.72rem', fontWeight: 300, padding: '5px 12px', borderRadius: 20, whiteSpace: 'nowrap',
+                color: i === activeIndex ? 'rgba(248,244,255,.75)' : 'rgba(248,244,255,.3)',
+                border: i === activeIndex ? `1px solid ${p.cat.hex}35` : '1px solid rgba(255,255,255,.04)',
+                background: i === activeIndex ? `${p.cat.hex}10` : 'rgba(255,255,255,.02)',
                 transition: 'all .3s', WebkitTapHighlightColor: 'transparent',
               }}>
               <span className="rounded-full flex-shrink-0" style={{
                 width: 6, height: 6, background: p.cat.hex,
-                boxShadow: i === activeIndex ? `0 0 6px ${p.cat.hex}60` : 'none',
+                boxShadow: i === activeIndex ? `0 0 8px ${p.cat.hex}70` : 'none',
+                transition: 'box-shadow .3s',
               }} />
               {p.name} {p.pct}%
             </button>
@@ -106,17 +107,19 @@ export default function PlanetCarousel({ posts, username, onStarTap, onClusterTa
         {planets.map((p, i) => (
           <button key={p.name} className="rounded-full cursor-pointer" onClick={() => scrollToIndex(i)}
             style={{
-              width: i === activeIndex ? 20 : 6, height: 6,
-              background: i === activeIndex ? p.cat.hex : 'rgba(248,244,255,.15)',
-              boxShadow: i === activeIndex ? `0 0 8px ${p.cat.hex}50` : 'none',
-              border: 'none', padding: 0, transition: 'all .4s cubic-bezier(.16,1,.3,1)',
+              width: i === activeIndex ? 22 : 6, height: 6,
+              background: i === activeIndex ? p.cat.hex : 'rgba(248,244,255,.12)',
+              boxShadow: i === activeIndex ? `0 0 12px ${p.cat.hex}60` : 'none',
+              border: 'none', padding: 0, transition: 'all .5s cubic-bezier(.16,1,.3,1)',
               WebkitTapHighlightColor: 'transparent',
             }} />
         ))}
       </div>
 
       <div className="fixed left-0 right-0 z-[100] text-center pointer-events-none" style={{ bottom: 62 }}>
-        <p style={{ fontSize: '.68rem', fontWeight: 300, color: 'rgba(248,244,255,.15)' }}>← 스와이프하여 행성 탐험 →</p>
+        <p style={{ fontSize: '.68rem', fontWeight: 300, color: 'rgba(248,244,255,.12)' }}>
+          ← 스와이프하여 행성 탐험 →
+        </p>
       </div>
     </div>
   );
@@ -131,27 +134,43 @@ function PlanetSlide({ planet, onStarTap, onPlanetTap }: {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef(0);
 
-  // Pre-compute star orbital data (deterministic from post.id)
+  // Pre-compute star orbital data
   const starOrbits = useMemo(() => {
     return planet.posts.map((post, i) => {
       const seed = ((post.id * 9301 + 49297) % 233280) / 233280;
-      const ring = i < 5 ? 0 : i < 12 ? 1 : 2;
+      const ring = i < 5 ? 0 : i < 14 ? 1 : 2;
       const countInRing = ring === 0 ? Math.min(5, planet.posts.length)
-        : ring === 1 ? Math.min(7, Math.max(0, planet.posts.length - 5))
-          : Math.max(0, planet.posts.length - 12);
-      const idxInRing = ring === 0 ? i : ring === 1 ? i - 5 : i - 12;
+        : ring === 1 ? Math.min(9, Math.max(0, planet.posts.length - 5))
+          : Math.max(0, planet.posts.length - 14);
+      const idxInRing = ring === 0 ? i : ring === 1 ? i - 5 : i - 14;
       const baseAngle = countInRing > 0 ? (Math.PI * 2 / countInRing) * idxInRing : 0;
 
       return {
         post,
-        angle0: baseAngle + (seed - 0.5) * 0.3,
-        orbitMul: [1.35, 1.75, 2.2][ring] + seed * 0.12,
-        speed: (0.15 + seed * 0.25) * (ring === 0 ? 1 : ring === 1 ? 0.7 : 0.5),
-        size: Math.max(1.5, 2 + (post.likes / 600) * 3),
+        angle0: baseAngle + (seed - 0.5) * 0.4,
+        orbitMul: [1.45, 1.95, 2.55][ring] + seed * 0.15,
+        speed: (0.12 + seed * 0.18) * (ring === 0 ? 1 : ring === 1 ? 0.65 : 0.4),
+        size: Math.max(1.8, 2.5 + (post.likes / 500) * 3.5),
         seed,
+        ring,
       };
     });
   }, [planet.posts]);
+
+  // Floating particles (ambient dust)
+  const particles = useMemo(() => {
+    const result: { x: number; y: number; r: number; speed: number; phase: number; drift: number }[] = [];
+    for (let i = 0; i < 40; i++) {
+      result.push({
+        x: Math.random(), y: Math.random(),
+        r: Math.random() * 1.2 + 0.3,
+        speed: Math.random() * 0.0003 + 0.0001,
+        phase: Math.random() * Math.PI * 2,
+        drift: Math.random() * 0.00015 + 0.00005,
+      });
+    }
+    return result;
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -171,17 +190,22 @@ function PlanetSlide({ planet, onStarTap, onPlanetTap }: {
     ctx.scale(dpr, dpr);
 
     const cx = w / 2;
-    const cy = h * 0.38;
-    const planetR = Math.min(w * 0.17, 80);
+    const cy = h * 0.36;
+    const planetR = Math.min(w * 0.18, 85);
     const { r: cr, g: cg, b: cb } = planet.cat;
 
-    // Background stars (static, rendered once)
+    // Secondary color (shifted hue for iridescence)
+    const cr2 = Math.min(255, cr + 60) % 256;
+    const cg2 = Math.min(255, cg + 40) % 256;
+    const cb2 = Math.min(255, cb + 80) % 256;
+
+    // Background stars
     const bgStars: { x: number; y: number; r: number; a: number; sp: number; ph: number }[] = [];
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 160; i++) {
       bgStars.push({
         x: Math.random() * w, y: Math.random() * h,
-        r: Math.random() * 0.5 + 0.06, a: Math.random() * 0.25 + 0.03,
-        sp: Math.random() * 0.004 + 0.001, ph: Math.random() * Math.PI * 2,
+        r: Math.random() * 0.6 + 0.08, a: Math.random() * 0.2 + 0.02,
+        sp: Math.random() * 0.003 + 0.0008, ph: Math.random() * Math.PI * 2,
       });
     }
 
@@ -192,30 +216,62 @@ function PlanetSlide({ planet, onStarTap, onPlanetTap }: {
       // Background stars (twinkling)
       bgStars.forEach(s => {
         const tw = 0.3 + 0.7 * Math.sin(t * s.sp + s.ph);
-        ctx!.fillStyle = `rgba(200,190,240,${s.a * tw})`;
+        ctx!.fillStyle = `rgba(220,215,245,${s.a * tw})`;
         ctx!.beginPath();
         ctx!.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx!.fill();
       });
 
-      // Planet atmosphere glow (pulsing)
-      const pulse = 0.9 + 0.1 * Math.sin(t * 0.001);
-      const atm = ctx!.createRadialGradient(cx, cy, planetR * 0.5, cx, cy, planetR * 2.8 * pulse);
-      atm.addColorStop(0, `rgba(${cr},${cg},${cb},0.06)`);
-      atm.addColorStop(0.5, `rgba(${cr},${cg},${cb},0.02)`);
-      atm.addColorStop(1, 'transparent');
-      ctx!.fillStyle = atm;
+      // Floating ambient particles
+      particles.forEach(p => {
+        const px = (p.x + Math.sin(t * p.drift + p.phase) * 0.03) * w;
+        const py = (p.y + Math.cos(t * p.drift * 0.7 + p.phase) * 0.02) * h;
+        const pAlpha = 0.04 + 0.03 * Math.sin(t * 0.001 + p.phase);
+        ctx!.fillStyle = `rgba(${cr},${cg},${cb},${pAlpha})`;
+        ctx!.beginPath();
+        ctx!.arc(px, py, p.r, 0, Math.PI * 2);
+        ctx!.fill();
+      });
+
+      const pulse = 0.92 + 0.08 * Math.sin(t * 0.0008);
+      const breathe = 0.95 + 0.05 * Math.sin(t * 0.0012 + 1);
+
+      // Deep nebula glow (layered)
+      const neb1 = ctx!.createRadialGradient(cx, cy, 0, cx, cy, planetR * 4 * pulse);
+      neb1.addColorStop(0, `rgba(${cr},${cg},${cb},0.04)`);
+      neb1.addColorStop(0.3, `rgba(${cr2},${cg2},${cb2},0.015)`);
+      neb1.addColorStop(0.7, `rgba(${cr},${cg},${cb},0.005)`);
+      neb1.addColorStop(1, 'transparent');
+      ctx!.fillStyle = neb1;
       ctx!.beginPath();
-      ctx!.arc(cx, cy, planetR * 2.8 * pulse, 0, Math.PI * 2);
+      ctx!.arc(cx, cy, planetR * 4 * pulse, 0, Math.PI * 2);
       ctx!.fill();
 
-      // Orbit rings (subtle, rotating slowly)
+      // Atmospheric haze (offset)
+      const neb2 = ctx!.createRadialGradient(cx - planetR * 0.5, cy + planetR * 0.3, 0, cx, cy, planetR * 3);
+      neb2.addColorStop(0, `rgba(${cr2},${cg2},${cb2},0.025)`);
+      neb2.addColorStop(0.5, `rgba(${cr},${cg},${cb},0.008)`);
+      neb2.addColorStop(1, 'transparent');
+      ctx!.fillStyle = neb2;
+      ctx!.beginPath();
+      ctx!.arc(cx, cy, planetR * 3, 0, Math.PI * 2);
+      ctx!.fill();
+
+      // Orbit rings (glass-like, with subtle glow)
       ctx!.save();
       ctx!.translate(cx, cy);
-      const tilt = 0.6; // ellipse tilt ratio
-      [1.35, 1.75, 2.2].forEach((ringMul, ri) => {
+      const tilt = 0.55;
+      [1.45, 1.95, 2.55].forEach((ringMul, ri) => {
         const ringR = planetR * ringMul;
-        ctx!.strokeStyle = `rgba(${cr},${cg},${cb},${0.04 - ri * 0.01})`;
+        const ringAlpha = 0.035 - ri * 0.008;
+        // Ring glow
+        ctx!.strokeStyle = `rgba(${cr},${cg},${cb},${ringAlpha * 1.5})`;
+        ctx!.lineWidth = 2;
+        ctx!.beginPath();
+        ctx!.ellipse(0, 0, ringR, ringR * tilt, 0, 0, Math.PI * 2);
+        ctx!.stroke();
+        // Thin inner line
+        ctx!.strokeStyle = `rgba(255,255,255,${ringAlpha * 0.6})`;
         ctx!.lineWidth = 0.5;
         ctx!.beginPath();
         ctx!.ellipse(0, 0, ringR, ringR * tilt, 0, 0, Math.PI * 2);
@@ -223,76 +279,141 @@ function PlanetSlide({ planet, onStarTap, onPlanetTap }: {
       });
       ctx!.restore();
 
-      // Stars behind planet (draw first)
+      // Stars behind planet
       const tSec = t / 1000;
       starOrbits.forEach(so => {
         const angle = so.angle0 + tSec * so.speed;
         const orbitRx = planetR * so.orbitMul;
-        const orbitRy = orbitRx * 0.6;
+        const orbitRy = orbitRx * tilt;
         const sy = Math.sin(angle);
-        if (sy <= 0.15) return; // only behind
+        if (sy <= 0.1) return; // only behind
         const sx = cx + Math.cos(angle) * orbitRx;
         const starY = cy + sy * orbitRy;
-        drawStar(ctx!, sx, starY, so.size * 0.6, cr, cg, cb, 0.12, t, so.seed);
+        // Distance-based fade (further = dimmer)
+        const depthAlpha = 0.08 + 0.07 * (1 - sy);
+        drawGlassStar(ctx!, sx, starY, so.size * 0.55, cr, cg, cb, cr2, cg2, cb2, depthAlpha, t, so.seed);
       });
 
-      // Planet sphere
-      // Main body
-      const pg = ctx!.createRadialGradient(cx - planetR * 0.3, cy - planetR * 0.3, 0, cx, cy, planetR);
-      pg.addColorStop(0, `rgba(${Math.min(255, cr + 50)},${Math.min(255, cg + 50)},${Math.min(255, cb + 50)},0.5)`);
-      pg.addColorStop(0.4, `rgba(${cr},${cg},${cb},0.35)`);
-      pg.addColorStop(0.75, `rgba(${Math.max(0, cr - 30)},${Math.max(0, cg - 30)},${Math.max(0, cb - 30)},0.2)`);
-      pg.addColorStop(1, `rgba(${Math.max(0, cr - 60)},${Math.max(0, cg - 60)},${Math.max(0, cb - 60)},0.08)`);
-      ctx!.fillStyle = pg;
+      // === Planet sphere (glassmorphism style) ===
+      // Outer atmosphere ring
+      const outerGlow = ctx!.createRadialGradient(cx, cy, planetR * 0.9, cx, cy, planetR * 1.4 * breathe);
+      outerGlow.addColorStop(0, `rgba(${cr},${cg},${cb},0.08)`);
+      outerGlow.addColorStop(0.5, `rgba(${cr2},${cg2},${cb2},0.03)`);
+      outerGlow.addColorStop(1, 'transparent');
+      ctx!.fillStyle = outerGlow;
+      ctx!.beginPath();
+      ctx!.arc(cx, cy, planetR * 1.4 * breathe, 0, Math.PI * 2);
+      ctx!.fill();
+
+      // Glass sphere body - layered gradients for depth
+      // Base: deep, slightly transparent
+      const baseGrad = ctx!.createRadialGradient(
+        cx - planetR * 0.25, cy - planetR * 0.25, 0,
+        cx, cy, planetR
+      );
+      baseGrad.addColorStop(0, `rgba(${Math.min(255, cr + 40)},${Math.min(255, cg + 40)},${Math.min(255, cb + 40)},0.35)`);
+      baseGrad.addColorStop(0.35, `rgba(${cr},${cg},${cb},0.22)`);
+      baseGrad.addColorStop(0.7, `rgba(${Math.max(0, cr - 25)},${Math.max(0, cg - 25)},${Math.max(0, cb - 25)},0.14)`);
+      baseGrad.addColorStop(1, `rgba(${Math.max(0, cr - 50)},${Math.max(0, cg - 50)},${Math.max(0, cb - 50)},0.05)`);
+      ctx!.fillStyle = baseGrad;
       ctx!.beginPath();
       ctx!.arc(cx, cy, planetR, 0, Math.PI * 2);
       ctx!.fill();
 
-      // Specular highlight
-      const hl = ctx!.createRadialGradient(cx - planetR * 0.3, cy - planetR * 0.3, 0, cx - planetR * 0.3, cy - planetR * 0.3, planetR * 0.6);
-      hl.addColorStop(0, 'rgba(255,255,255,0.15)');
-      hl.addColorStop(0.5, 'rgba(255,255,255,0.03)');
-      hl.addColorStop(1, 'transparent');
-      ctx!.fillStyle = hl;
+      // Inner light bands (rotating slowly for life)
+      ctx!.save();
+      ctx!.beginPath();
+      ctx!.arc(cx, cy, planetR, 0, Math.PI * 2);
+      ctx!.clip();
+
+      const bandAngle = t * 0.0002;
+      for (let b = 0; b < 3; b++) {
+        const bx = cx + Math.cos(bandAngle + b * 2.1) * planetR * 0.3;
+        const by = cy + Math.sin(bandAngle + b * 2.1) * planetR * 0.2;
+        const bandGrad = ctx!.createRadialGradient(bx, by, 0, bx, by, planetR * 0.7);
+        bandGrad.addColorStop(0, `rgba(${cr2},${cg2},${cb2},0.06)`);
+        bandGrad.addColorStop(0.5, `rgba(${cr},${cg},${cb},0.02)`);
+        bandGrad.addColorStop(1, 'transparent');
+        ctx!.fillStyle = bandGrad;
+        ctx!.beginPath();
+        ctx!.arc(bx, by, planetR * 0.7, 0, Math.PI * 2);
+        ctx!.fill();
+      }
+      ctx!.restore();
+
+      // Glass specular highlight (top-left, crisp)
+      const specGrad = ctx!.createRadialGradient(
+        cx - planetR * 0.32, cy - planetR * 0.32, 0,
+        cx - planetR * 0.2, cy - planetR * 0.2, planetR * 0.65
+      );
+      specGrad.addColorStop(0, 'rgba(255,255,255,0.22)');
+      specGrad.addColorStop(0.3, 'rgba(255,255,255,0.08)');
+      specGrad.addColorStop(0.6, 'rgba(255,255,255,0.02)');
+      specGrad.addColorStop(1, 'transparent');
+      ctx!.fillStyle = specGrad;
       ctx!.beginPath();
       ctx!.arc(cx, cy, planetR, 0, Math.PI * 2);
       ctx!.fill();
 
-      // Edge glow (rim lighting)
-      const rim = ctx!.createRadialGradient(cx + planetR * 0.2, cy + planetR * 0.1, planetR * 0.6, cx, cy, planetR * 1.05);
-      rim.addColorStop(0, 'transparent');
-      rim.addColorStop(0.85, 'transparent');
-      rim.addColorStop(1, `rgba(${cr},${cg},${cb},0.15)`);
-      ctx!.fillStyle = rim;
+      // Rim light (bottom-right, colored)
+      const rimGrad = ctx!.createRadialGradient(
+        cx + planetR * 0.35, cy + planetR * 0.25, planetR * 0.4,
+        cx, cy, planetR * 1.08
+      );
+      rimGrad.addColorStop(0, 'transparent');
+      rimGrad.addColorStop(0.7, 'transparent');
+      rimGrad.addColorStop(0.92, `rgba(${cr},${cg},${cb},0.12)`);
+      rimGrad.addColorStop(1, `rgba(${cr2},${cg2},${cb2},0.2)`);
+      ctx!.fillStyle = rimGrad;
       ctx!.beginPath();
-      ctx!.arc(cx, cy, planetR * 1.05, 0, Math.PI * 2);
+      ctx!.arc(cx, cy, planetR * 1.08, 0, Math.PI * 2);
       ctx!.fill();
 
-      // Post count in center
+      // Glass edge border (subtle)
+      ctx!.strokeStyle = `rgba(255,255,255,0.06)`;
+      ctx!.lineWidth = 1;
+      ctx!.beginPath();
+      ctx!.arc(cx, cy, planetR, 0, Math.PI * 2);
+      ctx!.stroke();
+
+      // Post count
       ctx!.save();
       ctx!.textAlign = 'center';
       ctx!.textBaseline = 'middle';
       ctx!.font = `italic 300 ${Math.max(11, planetR * 0.22)}px "Cormorant Garamond"`;
-      ctx!.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx!.fillStyle = `rgba(255,255,255,0.2)`;
       ctx!.fillText(`${planet.count}`, cx, cy);
       ctx!.restore();
 
-      // Stars in front of planet (draw on top)
+      // Stars in front of planet
       starOrbits.forEach(so => {
         const angle = so.angle0 + tSec * so.speed;
         const orbitRx = planetR * so.orbitMul;
-        const orbitRy = orbitRx * 0.6;
+        const orbitRy = orbitRx * tilt;
         const sy = Math.sin(angle);
-        if (sy > 0.15) return; // only in front
+        if (sy > 0.1) return; // only in front
         const sx = cx + Math.cos(angle) * orbitRx;
         const starY = cy + sy * orbitRy;
-        drawStar(ctx!, sx, starY, so.size, cr, cg, cb, 0.7, t, so.seed);
+        drawGlassStar(ctx!, sx, starY, so.size, cr, cg, cb, cr2, cg2, cb2, 0.75, t, so.seed);
       });
+
+      // Floating sparkles near planet surface
+      for (let i = 0; i < 6; i++) {
+        const sparkAngle = t * 0.0005 + i * 1.047;
+        const sparkDist = planetR * (1.1 + 0.1 * Math.sin(t * 0.002 + i));
+        const sx = cx + Math.cos(sparkAngle) * sparkDist;
+        const sy = cy + Math.sin(sparkAngle) * sparkDist * tilt;
+        const sparkAlpha = 0.15 + 0.1 * Math.sin(t * 0.004 + i * 2);
+        ctx!.fillStyle = `rgba(255,255,255,${sparkAlpha})`;
+        ctx!.beginPath();
+        ctx!.arc(sx, sy, 0.8, 0, Math.PI * 2);
+        ctx!.fill();
+      }
     }
 
     animRef.current = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(animRef.current);
-  }, [planet, starOrbits]);
+  }, [planet, starOrbits, particles]);
 
   // Tap handling
   const pointerStart = useRef<{ x: number; y: number; t: number } | null>(null);
@@ -316,26 +437,27 @@ function PlanetSlide({ planet, onStarTap, onPlanetTap }: {
     const my = e.clientY - rect.top;
     const w = rect.width;
     const h = rect.height;
-    const cx = w / 2;
-    const cy = h * 0.38;
-    const planetR = Math.min(w * 0.17, 80);
+    const cxp = w / 2;
+    const cyp = h * 0.36;
+    const planetR = Math.min(w * 0.18, 85);
 
     // Planet tap
-    if (Math.hypot(mx - cx, my - cy) < planetR * 1.2) {
+    if (Math.hypot(mx - cxp, my - cyp) < planetR * 1.2) {
       onPlanetTap();
       return;
     }
 
     // Star tap
     const tSec = performance.now() / 1000;
+    const tilt = 0.55;
     let closest: PostData | null = null;
-    let minD = 30;
+    let minD = 35;
     starOrbits.forEach(so => {
       const angle = so.angle0 + tSec * so.speed;
       const orbitRx = planetR * so.orbitMul;
-      const orbitRy = orbitRx * 0.6;
-      const sx = cx + Math.cos(angle) * orbitRx;
-      const sy = cy + Math.sin(angle) * orbitRy;
+      const orbitRy = orbitRx * tilt;
+      const sx = cxp + Math.cos(angle) * orbitRx;
+      const sy = cyp + Math.sin(angle) * orbitRy;
       const d = Math.hypot(mx - sx, my - sy);
       if (d < minD) { minD = d; closest = so.post; }
     });
@@ -351,24 +473,26 @@ function PlanetSlide({ planet, onStarTap, onPlanetTap }: {
 
       {/* Planet info */}
       <div className="absolute z-10 text-center left-0 right-0" style={{ bottom: '22%' }}>
-        <h2 className="font-brand italic font-normal mb-1" style={{
-          fontSize: '1.8rem',
-          color: `rgba(${planet.cat.r},${planet.cat.g},${planet.cat.b},0.85)`,
-          textShadow: `0 0 30px rgba(${planet.cat.r},${planet.cat.g},${planet.cat.b},0.2)`,
+        <h2 className="font-brand italic font-normal mb-1.5" style={{
+          fontSize: '1.9rem',
+          color: `rgba(${planet.cat.r},${planet.cat.g},${planet.cat.b},0.9)`,
+          textShadow: `0 0 40px rgba(${planet.cat.r},${planet.cat.g},${planet.cat.b},0.25), 0 0 80px rgba(${planet.cat.r},${planet.cat.g},${planet.cat.b},0.08)`,
         }}>{planet.name}</h2>
-        <p style={{ fontSize: '.88rem', fontWeight: 300, color: 'rgba(248,244,255,.45)' }}>
+        <p style={{ fontSize: '.85rem', fontWeight: 300, color: 'rgba(248,244,255,.4)', letterSpacing: '.02em' }}>
           {planet.count}개의 별 · 우주의 {planet.pct}%
         </p>
       </div>
 
-      {/* Hint card */}
+      {/* Hint card (glassmorphism) */}
       <div className="absolute z-10 left-5 right-5" style={{ bottom: '11%' }}>
         <div className="mx-auto rounded-2xl text-center" style={{
           maxWidth: 340, padding: '12px 18px',
-          background: 'rgba(12,14,32,.8)', backdropFilter: 'blur(12px)',
-          border: `1px solid rgba(${planet.cat.r},${planet.cat.g},${planet.cat.b},0.06)`,
+          background: 'rgba(255,255,255,.03)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,.05)',
         }}>
-          <p className="font-light" style={{ fontSize: '.78rem', color: 'rgba(248,244,255,.35)', lineHeight: 1.5 }}>
+          <p className="font-light" style={{ fontSize: '.78rem', color: 'rgba(248,244,255,.3)', lineHeight: 1.5 }}>
             별을 터치하면 AI 인사이트 · 행성을 터치하면 카테고리 분석
           </p>
         </div>
@@ -377,37 +501,64 @@ function PlanetSlide({ planet, onStarTap, onPlanetTap }: {
   );
 }
 
-// Draw a single star with glow + twinkle
-function drawStar(
+// Draw a premium glassmorphism-style star with layered glow, iridescence and twinkle
+function drawGlassStar(
   ctx: CanvasRenderingContext2D,
   x: number, y: number, size: number,
   cr: number, cg: number, cb: number,
+  cr2: number, cg2: number, cb2: number,
   baseAlpha: number, t: number, seed: number,
 ) {
-  const tw = 0.5 + 0.5 * Math.sin(t * 0.003 + seed * 20);
-  const alpha = baseAlpha * (0.4 + 0.6 * tw);
+  // Smooth twinkle
+  const tw = 0.5 + 0.5 * Math.sin(t * 0.0025 + seed * 20);
+  const alpha = baseAlpha * (0.5 + 0.5 * tw);
 
-  // Outer glow
-  const g = ctx.createRadialGradient(x, y, 0, x, y, size * 4);
-  g.addColorStop(0, `rgba(${cr},${cg},${cb},${alpha * 0.3})`);
-  g.addColorStop(1, 'transparent');
-  ctx.fillStyle = g;
+  // Outer nebula glow (soft, wide)
+  const outerR = size * 6;
+  const g1 = ctx.createRadialGradient(x, y, 0, x, y, outerR);
+  g1.addColorStop(0, `rgba(${cr},${cg},${cb},${alpha * 0.15})`);
+  g1.addColorStop(0.4, `rgba(${cr2},${cg2},${cb2},${alpha * 0.05})`);
+  g1.addColorStop(1, 'transparent');
+  ctx.fillStyle = g1;
   ctx.beginPath();
-  ctx.arc(x, y, size * 4, 0, Math.PI * 2);
+  ctx.arc(x, y, outerR, 0, Math.PI * 2);
   ctx.fill();
 
-  // Inner glow
-  const g2 = ctx.createRadialGradient(x, y, 0, x, y, size * 1.5);
-  g2.addColorStop(0, `rgba(${cr},${cg},${cb},${alpha * 0.5})`);
+  // Mid glow (iridescent shift)
+  const midR = size * 2.5;
+  const g2 = ctx.createRadialGradient(x, y, 0, x, y, midR);
+  g2.addColorStop(0, `rgba(${cr2},${cg2},${cb2},${alpha * 0.35})`);
+  g2.addColorStop(0.5, `rgba(${cr},${cg},${cb},${alpha * 0.12})`);
   g2.addColorStop(1, 'transparent');
   ctx.fillStyle = g2;
   ctx.beginPath();
-  ctx.arc(x, y, size * 1.5, 0, Math.PI * 2);
+  ctx.arc(x, y, midR, 0, Math.PI * 2);
   ctx.fill();
 
-  // Bright core
-  ctx.fillStyle = `rgba(255,255,255,${alpha * 0.85})`;
+  // Core (white-hot center)
+  const coreR = size * 0.6;
+  const g3 = ctx.createRadialGradient(x, y, 0, x, y, coreR);
+  g3.addColorStop(0, `rgba(255,255,255,${alpha * 0.9})`);
+  g3.addColorStop(0.4, `rgba(255,250,255,${alpha * 0.4})`);
+  g3.addColorStop(1, `rgba(${cr},${cg},${cb},${alpha * 0.1})`);
+  ctx.fillStyle = g3;
   ctx.beginPath();
-  ctx.arc(x, y, size * 0.45, 0, Math.PI * 2);
+  ctx.arc(x, y, coreR, 0, Math.PI * 2);
   ctx.fill();
+
+  // Cross-flare for brighter stars
+  if (size > 3.5 && alpha > 0.3) {
+    const flareLen = size * 3;
+    const flareAlpha = alpha * 0.15;
+    ctx.strokeStyle = `rgba(255,255,255,${flareAlpha})`;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(x - flareLen, y);
+    ctx.lineTo(x + flareLen, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y - flareLen * 0.7);
+    ctx.lineTo(x, y + flareLen * 0.7);
+    ctx.stroke();
+  }
 }

@@ -20,9 +20,21 @@ export async function scrapeInstagramPosts(
   maxPosts: number = MAX_POSTS
 ): Promise<ScrapeResult> {
   try {
+    // Clean username: strip @, extract from URL if needed
+    let cleanUsername = username.trim().replace(/^@/, '');
+    const urlMatch = cleanUsername.match(
+      /(?:https?:\/\/)?(?:www\.)?instagram\.com\/([a-zA-Z0-9._]+)\/?/
+    );
+    if (urlMatch) {
+      cleanUsername = urlMatch[1];
+    }
+
+    // Try with both username and directUrls for maximum compatibility
+    const profileUrl = `https://www.instagram.com/${cleanUsername}/`;
     const run = await client.actor(ACTOR_ID).call(
       {
-        username: [username],
+        username: [cleanUsername],
+        directUrls: [profileUrl],
         resultsLimit: maxPosts,
       },
       {

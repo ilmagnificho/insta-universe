@@ -112,7 +112,7 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-[130] flex items-center justify-center"
+    <div className="fixed inset-0 z-[210] flex items-center justify-center"
       style={{ background: 'radial-gradient(ellipse at center, #14102a, #0c0818)' }}>
       <canvas ref={canvasRef} className="fixed inset-0" />
       <p className="relative z-10 font-brand italic font-light text-center transition-opacity duration-500"
@@ -678,12 +678,15 @@ function UniverseContent() {
   }, [isPaid]);
 
   const handlePayment = useCallback(() => {
+    setBsOpen(false);       // Close bottom sheet immediately
     setIsTransitioning(true);
     setPhase('unlock');
     router.push(`/universe/demo?username=${encodeURIComponent(username)}&paid=true`);
   }, [router, username]);
 
   const handleUnlockComplete = useCallback(() => {
+    setBsOpen(false);       // Ensure bottom sheet is closed
+    setIsTransitioning(false);
     setPhase('explore');
     setTimeout(() => setShowOnboarding(true), 700);
   }, []);
