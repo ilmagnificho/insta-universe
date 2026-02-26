@@ -9,7 +9,6 @@ interface Props {
 }
 
 export default function BottomSheet({ open, onClose, children }: Props) {
-  // Delay pointer-events on overlay to prevent tap-through race condition on mobile
   const [allowClose, setAllowClose] = useState(false);
 
   useEffect(() => {
@@ -32,7 +31,6 @@ export default function BottomSheet({ open, onClose, children }: Props) {
 
   return (
     <>
-      {/* Backdrop - uses inline styles for reliable rendering */}
       <div
         onClick={() => allowClose && onClose()}
         style={{
@@ -46,7 +44,6 @@ export default function BottomSheet({ open, onClose, children }: Props) {
           WebkitTapHighlightColor: 'transparent',
         }}
       />
-      {/* Sheet container - inline styles ensure no CSS class issues */}
       <div
         style={{
           position: 'fixed',
@@ -72,7 +69,6 @@ export default function BottomSheet({ open, onClose, children }: Props) {
             WebkitOverflowScrolling: 'touch',
           }}
         >
-          {/* Handle */}
           <div
             style={{
               width: 36,
@@ -89,17 +85,69 @@ export default function BottomSheet({ open, onClose, children }: Props) {
   );
 }
 
+// ===== Locked insight section (free mode) =====
+function LockedInsightSection({ label, blurText, onPayment }: { label: string; blurText: string; onPayment: () => void }) {
+  return (
+    <div className="rounded-xl relative overflow-hidden" style={{
+      padding: '16px 18px',
+      background: 'linear-gradient(165deg, rgba(210,160,200,.06), rgba(180,140,220,.03))',
+      borderLeft: '2px solid rgba(210,160,200,.1)',
+      minHeight: 90,
+    }}>
+      <p className="font-brand italic mb-2" style={{
+        fontSize: '.78rem', color: 'rgba(210,160,200,.6)', letterSpacing: '.06em',
+      }}>
+        {label}
+      </p>
+      <p className="font-light" style={{
+        fontSize: '.9rem', color: 'rgba(248,244,255,.72)', lineHeight: 1.8,
+        filter: 'blur(5px)', WebkitFilter: 'blur(5px)',
+        userSelect: 'none', WebkitUserSelect: 'none',
+      }}>
+        {blurText}
+      </p>
+      <div style={{
+        position: 'absolute',
+        left: 0, right: 0, bottom: 0,
+        height: '75%',
+        background: 'linear-gradient(to bottom, transparent 0%, rgba(18,12,30,.7) 40%, rgba(18,12,30,.95) 100%)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
+        padding: '0 18px 14px',
+      }}>
+        <button
+          onClick={onPayment}
+          className="cursor-pointer rounded-lg active:scale-[.98] w-full"
+          style={{
+            padding: '10px',
+            fontSize: '.82rem', fontWeight: 300,
+            color: 'rgba(210,160,200,.7)',
+            background: 'rgba(210,160,200,.08)',
+            border: '1px solid rgba(210,160,200,.12)',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          잠금 해제하기
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ===== Star detail sheet =====
 export function StarSheetContent({
   post,
   insight,
   bonusInsight,
   starRank,
+  isPaid = true,
+  onPayment,
 }: {
   post: { caption: string; likes: number; date: string; hour: number; tags: string[]; cat: { name: string; hex: string } };
   insight: string;
   bonusInsight?: string | null;
   starRank?: 'brightest' | 'bright';
+  isPaid?: boolean;
+  onPayment?: () => void;
 }) {
   const timeLabel = post.hour < 6 ? '새벽' : post.hour < 12 ? '오전' : post.hour < 18 ? '오후' : '저녁';
   const dateStr = new Date(post.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -151,46 +199,65 @@ export function StarSheetContent({
 
       <div style={{ height: 1, background: 'rgba(210,160,200,.06)', marginBottom: 16 }} />
 
-      <div className="rounded-xl" style={{
-        padding: '16px 18px',
-        background: 'linear-gradient(165deg, rgba(210,160,200,.06), rgba(180,140,220,.03))',
-        borderLeft: '2px solid rgba(210,160,200,.2)',
-      }}>
-        <p className="font-brand italic mb-2" style={{ fontSize: '.78rem', color: 'rgba(210,160,200,.6)', letterSpacing: '.06em' }}>
-          AI가 읽은 이 순간
-        </p>
-        <p className="font-light leading-relaxed" style={{ fontSize: '.9rem', color: 'rgba(248,244,255,.72)', lineHeight: 1.8 }}
-          dangerouslySetInnerHTML={{ __html: insight.replace(/\n/g, '<br/>') }}
-        />
-      </div>
+      {isPaid ? (
+        <>
+          <div className="rounded-xl" style={{
+            padding: '16px 18px',
+            background: 'linear-gradient(165deg, rgba(210,160,200,.06), rgba(180,140,220,.03))',
+            borderLeft: '2px solid rgba(210,160,200,.2)',
+          }}>
+            <p className="font-brand italic mb-2" style={{ fontSize: '.78rem', color: 'rgba(210,160,200,.6)', letterSpacing: '.06em' }}>
+              AI가 읽은 이 순간
+            </p>
+            <p className="font-light leading-relaxed" style={{ fontSize: '.9rem', color: 'rgba(248,244,255,.72)', lineHeight: 1.8 }}
+              dangerouslySetInnerHTML={{ __html: insight.replace(/\n/g, '<br/>') }}
+            />
+          </div>
 
-      {bonusInsight && (
-        <div className="rounded-xl mt-3" style={{
-          padding: '16px 18px',
-          background: 'linear-gradient(165deg, rgba(130,200,255,.04), rgba(210,160,200,.05))',
-          borderLeft: '2px solid rgba(130,200,255,.15)',
-        }}>
-          <p className="font-brand italic mb-2" style={{ fontSize: '.78rem', color: 'rgba(130,200,255,.55)', letterSpacing: '.06em' }}>
-            더 깊은 이야기
-          </p>
-          <p className="font-light leading-relaxed" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.6)', lineHeight: 1.8 }}>
-            {bonusInsight}
-          </p>
-        </div>
+          {bonusInsight && (
+            <div className="rounded-xl mt-3" style={{
+              padding: '16px 18px',
+              background: 'linear-gradient(165deg, rgba(130,200,255,.04), rgba(210,160,200,.05))',
+              borderLeft: '2px solid rgba(130,200,255,.15)',
+            }}>
+              <p className="font-brand italic mb-2" style={{ fontSize: '.78rem', color: 'rgba(130,200,255,.55)', letterSpacing: '.06em' }}>
+                더 깊은 이야기
+              </p>
+              <p className="font-light leading-relaxed" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.6)', lineHeight: 1.8 }}>
+                {bonusInsight}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-3 rounded-lg" style={{ padding: '10px 14px', background: 'rgba(210,160,200,.03)' }}>
+            <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.38)', lineHeight: 1.6 }}>
+              {post.hour >= 22 || post.hour < 5
+                ? '늦은 밤에 기록한 순간. 혼자만의 시간에 더 솔직해지는 사람.'
+                : post.hour >= 19
+                  ? '하루의 끝자락. 오늘을 정리하고 싶었던 순간.'
+                  : post.hour < 9
+                    ? '아침에 기록한 순간. 하루를 능동적으로 시작하는 사람.'
+                    : '낮 시간의 기록. 일상 속 빛나는 순간을 놓치지 않는 사람.'
+              }
+            </p>
+          </div>
+        </>
+      ) : (
+        <>
+          <LockedInsightSection
+            label="AI가 읽은 이 순간"
+            blurText="이 게시물에서 당신의 무의식적 감정 패턴이 드러나요. 특히 이 시간대에 기록한 것은 의미가 깊어요."
+            onPayment={onPayment!}
+          />
+          <div className="mt-3">
+            <LockedInsightSection
+              label="더 깊은 이야기"
+              blurText="당신이 이 카테고리에 끌리는 이유는 단순하지 않아요. 내면의 욕구가 반영되어 있어요."
+              onPayment={onPayment!}
+            />
+          </div>
+        </>
       )}
-
-      <div className="mt-3 rounded-lg" style={{ padding: '10px 14px', background: 'rgba(210,160,200,.03)' }}>
-        <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.38)', lineHeight: 1.6 }}>
-          {post.hour >= 22 || post.hour < 5
-            ? '늦은 밤에 기록한 순간. 혼자만의 시간에 더 솔직해지는 사람.'
-            : post.hour >= 19
-              ? '하루의 끝자락. 오늘을 정리하고 싶었던 순간.'
-              : post.hour < 9
-                ? '아침에 기록한 순간. 하루를 능동적으로 시작하는 사람.'
-                : '낮 시간의 기록. 일상 속 빛나는 순간을 놓치지 않는 사람.'
-          }
-        </p>
-      </div>
     </>
   );
 }
@@ -198,10 +265,12 @@ export function StarSheetContent({
 // ===== Cluster detail sheet =====
 export function ClusterSheetContent({
   name, hex, count, pct, avgLikes, topLikes, insight, crossInsight, timeNote,
+  isPaid = true, onPayment,
 }: {
   name: string; hex: string; count: number; pct: number;
   avgLikes: number; topLikes: number; insight: string;
   crossInsight?: string; timeNote?: string;
+  isPaid?: boolean; onPayment?: () => void;
 }) {
   return (
     <>
@@ -221,21 +290,32 @@ export function ClusterSheetContent({
         ))}
       </div>
       <div style={{ height: 1, background: 'rgba(210,160,200,.06)', marginBottom: 16 }} />
-      <div className="rounded-xl" style={{ padding: '16px 18px', background: 'linear-gradient(165deg, rgba(210,160,200,.06), rgba(180,140,220,.03))', borderLeft: '2px solid rgba(210,160,200,.2)' }}>
-        <p className="font-brand italic mb-2" style={{ fontSize: '.78rem', color: 'rgba(210,160,200,.6)', letterSpacing: '.06em' }}>AI 인사이트</p>
-        <p className="font-light leading-relaxed" style={{ fontSize: '.9rem', color: 'rgba(248,244,255,.7)', lineHeight: 1.8 }}>{insight}</p>
-      </div>
-      {timeNote && (
-        <div className="rounded-xl mt-3" style={{ padding: '14px 16px', background: 'rgba(210,160,200,.03)', borderLeft: '2px solid rgba(168,128,240,.12)' }}>
-          <p className="font-brand italic mb-1.5" style={{ fontSize: '.72rem', color: 'rgba(168,128,240,.5)', letterSpacing: '.04em' }}>시간 패턴</p>
-          <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.55)', lineHeight: 1.7 }}>{timeNote}</p>
-        </div>
-      )}
-      {crossInsight && (
-        <div className="rounded-xl mt-3" style={{ padding: '14px 16px', background: 'linear-gradient(165deg, rgba(130,200,255,.04), rgba(210,160,200,.04))', borderLeft: '2px solid rgba(130,200,255,.12)' }}>
-          <p className="font-brand italic mb-1.5" style={{ fontSize: '.72rem', color: 'rgba(130,200,255,.5)', letterSpacing: '.04em' }}>교차 패턴</p>
-          <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.55)', lineHeight: 1.7 }}>{crossInsight}</p>
-        </div>
+
+      {isPaid ? (
+        <>
+          <div className="rounded-xl" style={{ padding: '16px 18px', background: 'linear-gradient(165deg, rgba(210,160,200,.06), rgba(180,140,220,.03))', borderLeft: '2px solid rgba(210,160,200,.2)' }}>
+            <p className="font-brand italic mb-2" style={{ fontSize: '.78rem', color: 'rgba(210,160,200,.6)', letterSpacing: '.06em' }}>AI 인사이트</p>
+            <p className="font-light leading-relaxed" style={{ fontSize: '.9rem', color: 'rgba(248,244,255,.7)', lineHeight: 1.8 }}>{insight}</p>
+          </div>
+          {timeNote && (
+            <div className="rounded-xl mt-3" style={{ padding: '14px 16px', background: 'rgba(210,160,200,.03)', borderLeft: '2px solid rgba(168,128,240,.12)' }}>
+              <p className="font-brand italic mb-1.5" style={{ fontSize: '.72rem', color: 'rgba(168,128,240,.5)', letterSpacing: '.04em' }}>시간 패턴</p>
+              <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.55)', lineHeight: 1.7 }}>{timeNote}</p>
+            </div>
+          )}
+          {crossInsight && (
+            <div className="rounded-xl mt-3" style={{ padding: '14px 16px', background: 'linear-gradient(165deg, rgba(130,200,255,.04), rgba(210,160,200,.04))', borderLeft: '2px solid rgba(130,200,255,.12)' }}>
+              <p className="font-brand italic mb-1.5" style={{ fontSize: '.72rem', color: 'rgba(130,200,255,.5)', letterSpacing: '.04em' }}>교차 패턴</p>
+              <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.55)', lineHeight: 1.7 }}>{crossInsight}</p>
+            </div>
+          )}
+        </>
+      ) : (
+        <LockedInsightSection
+          label="AI 인사이트"
+          blurText="이 카테고리에 대한 당신의 관심은 표면적인 것 이상이에요. 깊은 내면의 욕구와 연결되어 있어요."
+          onPayment={onPayment!}
+        />
       )}
     </>
   );
