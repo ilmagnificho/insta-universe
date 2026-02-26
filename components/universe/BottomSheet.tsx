@@ -142,7 +142,11 @@ export function StarSheetContent({
   isPaid = true,
   onPayment,
 }: {
-  post: { caption: string; likes: number; date: string; hour: number; tags: string[]; cat: { name: string; hex: string } };
+  post: {
+    caption: string; likes: number; date: string; hour: number; tags: string[];
+    cat: { name: string; hex: string; r: number; g: number; b: number };
+    displayUrl?: string; postUrl?: string;
+  };
   insight: string;
   bonusInsight?: string | null;
   starRank?: 'brightest' | 'bright';
@@ -154,6 +158,31 @@ export function StarSheetContent({
 
   return (
     <>
+      {/* Post image */}
+      {post.displayUrl ? (
+        <div style={{
+          width: '100%', aspectRatio: '1', borderRadius: 10,
+          overflow: 'hidden', marginBottom: 14,
+          background: `linear-gradient(135deg, rgba(${post.cat.r},${post.cat.g},${post.cat.b},.15), rgba(${post.cat.r},${post.cat.g},${post.cat.b},.05))`,
+        }}>
+          <img
+            src={post.displayUrl} alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+        </div>
+      ) : (
+        <div style={{
+          width: '100%', height: 80, borderRadius: 10, marginBottom: 14,
+          background: `linear-gradient(135deg, rgba(${post.cat.r},${post.cat.g},${post.cat.b},.12), rgba(${post.cat.r},${post.cat.g},${post.cat.b},.04))`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <span style={{ fontSize: '.65rem', color: `rgba(${post.cat.r},${post.cat.g},${post.cat.b},.35)` }}>
+            {post.cat.name}
+          </span>
+        </div>
+      )}
+
       {starRank && (
         <div className="flex items-center gap-1.5 mb-3 rounded-full" style={{
           display: 'inline-flex', padding: '3px 10px',
@@ -257,6 +286,25 @@ export function StarSheetContent({
             />
           </div>
         </>
+      )}
+
+      {/* Original post link */}
+      {post.postUrl && (
+        <a
+          href={post.postUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block mt-3 text-center rounded-lg"
+          style={{
+            padding: '10px',
+            fontSize: '.78rem', fontWeight: 300,
+            color: 'rgba(248,244,255,.35)',
+            background: 'rgba(255,255,255,.02)',
+            border: '1px solid rgba(255,255,255,.04)',
+          }}
+        >
+          원본 보기 ↗
+        </a>
       )}
     </>
   );

@@ -495,7 +495,9 @@ function RevealContent() {
         }}>
           <MiniUniverse posts={data.posts} />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2" style={{
-            background: 'radial-gradient(ellipse at center, transparent 40%, rgba(12,8,24,.3) 80%)',
+            backdropFilter: 'blur(3px)',
+            WebkitBackdropFilter: 'blur(3px)',
+            background: 'radial-gradient(ellipse at center, rgba(12,8,24,.05), rgba(12,8,24,.3) 80%)',
           }}>
             <p className="font-brand italic font-normal" style={{
               fontSize: '1.15rem', color: 'rgba(248,244,255,.75)',

@@ -11,9 +11,11 @@ interface Props {
   items: ToastData[];
   active: boolean;
   onShareClick: () => void;
+  isPaid?: boolean;
 }
 
-export default function InsightToast({ items, active, onShareClick }: Props) {
+export default function InsightToast({ items, active, onShareClick, isPaid = true }: Props) {
+  if (!isPaid) return null;
   const [visibleToasts, setVisibleToasts] = useState<(ToastData & { id: number; show: boolean })[]>([]);
   const [showShare, setShowShare] = useState(false);
   const idCounter = useRef(0);
