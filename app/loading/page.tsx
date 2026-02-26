@@ -17,15 +17,13 @@ function LoadingContent() {
     if (generated.current) return;
     generated.current = true;
 
-    // Animate progress bar
     const fill = fillRef.current;
     if (fill) {
-      fill.offsetHeight; // force reflow
+      fill.offsetHeight;
       fill.style.transition = 'width 4s ease-in-out';
       fill.style.width = '100%';
     }
 
-    // Step messages
     const msgs = [
       '게시물을 수집하고 있어요...',
       'AI가 감정 패턴을 분석하고 있어요...',
@@ -37,7 +35,6 @@ function LoadingContent() {
       if (idx < msgs.length) setMessage(msgs[idx]);
     }, 1300);
 
-    // Generate mock data and navigate
     const timeout = setTimeout(() => {
       clearInterval(interval);
       const data = generateMockResult(username);
@@ -52,26 +49,41 @@ function LoadingContent() {
   }, [username, router]);
 
   return (
-    <div className="fixed inset-0 z-[110] flex flex-col items-center justify-center" style={{ background: '#06081a' }}>
-      <div
-        className="overflow-hidden mb-4.5"
-        style={{ width: 120, height: 1, background: 'rgba(255,255,255,.03)' }}
-      >
-        <div
-          ref={fillRef}
-          className="h-full"
-          style={{
-            width: 0,
-            background: 'linear-gradient(90deg, rgba(155,124,201,.3), rgba(124,156,201,.3))',
-          }}
-        />
+    <div className="fixed inset-0 z-[110] flex flex-col items-center justify-center"
+      style={{ background: 'radial-gradient(ellipse at 50% 40%, #0e1030, #06081a 70%)' }}>
+
+      {/* Ambient glow */}
+      <div className="absolute rounded-full"
+        style={{
+          width: 300, height: 300,
+          background: 'radial-gradient(circle, rgba(155,124,201,.15), transparent 70%)',
+          filter: 'blur(60px)',
+          animation: 'pulse 3s ease-in-out infinite',
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col items-center">
+        <p className="font-brand italic mb-6"
+          style={{ fontSize: '1.1rem', color: 'rgba(240,237,246,.5)', letterSpacing: '.06em' }}>
+          @{username}
+        </p>
+
+        <div className="overflow-hidden mb-6"
+          style={{ width: 160, height: 2, borderRadius: 1, background: 'rgba(255,255,255,.06)' }}>
+          <div ref={fillRef} className="h-full" style={{
+            width: 0, borderRadius: 1,
+            background: 'linear-gradient(90deg, rgba(155,124,201,.5), rgba(124,156,201,.5))',
+          }} />
+        </div>
+
+        <p className="font-light text-center" style={{
+          fontSize: '0.95rem',
+          color: 'rgba(240,237,246,.55)',
+          transition: 'opacity .3s',
+        }}>
+          {message}
+        </p>
       </div>
-      <p
-        className="font-extralight text-center"
-        style={{ fontSize: '.74rem', color: 'rgba(240,237,246,.2)' }}
-      >
-        {message}
-      </p>
     </div>
   );
 }
@@ -81,9 +93,7 @@ export default function LoadingPage() {
     <Suspense
       fallback={
         <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#06081a' }}>
-          <p style={{ fontSize: '.74rem', color: 'rgba(240,237,246,.2)', fontWeight: 200 }}>
-            로딩 중...
-          </p>
+          <p style={{ fontSize: '0.95rem', color: 'rgba(240,237,246,.45)', fontWeight: 300 }}>로딩 중...</p>
         </div>
       }
     >
