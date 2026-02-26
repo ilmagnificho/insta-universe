@@ -373,6 +373,8 @@ export function generateMockPosts(count: number = 50): PostData[] {
       date: new Date(now - Math.floor(Math.random() * 365) * 864e5).toISOString(),
       hour: tmpl.hour,
       tags: tmpl.cap.match(/#\w+/g) || [],
+      displayUrl: undefined,
+      postUrl: undefined,
     });
   }
   return posts;

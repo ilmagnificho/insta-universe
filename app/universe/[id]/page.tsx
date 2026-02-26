@@ -716,7 +716,9 @@ function UniverseContent() {
           date: star.post.date,
           hour: star.post.hour,
           tags: star.post.tags,
-          cat: { name: star.post.cat.name, hex: star.post.cat.hex },
+          cat: { name: star.post.cat.name, hex: star.post.cat.hex, r: star.post.cat.r, g: star.post.cat.g, b: star.post.cat.b },
+          displayUrl: star.post.displayUrl,
+          postUrl: star.post.postUrl,
         }}
         insight={insight}
         bonusInsight={bonusInsight}
@@ -866,11 +868,12 @@ function UniverseContent() {
       )}
 
       {/* Insight toasts (paid only) */}
-      {phase === 'explore' && isPaid && !showDNA && (
+      {phase === 'explore' && !showDNA && (
         <InsightToast
           items={toastItems}
           active={toastsActive}
           onShareClick={() => setShowShare(true)}
+          isPaid={isPaid}
         />
       )}
 
@@ -885,10 +888,10 @@ function UniverseContent() {
       )}
 
       {/* Floating payment CTA (free mode only) */}
-      {phase === 'explore' && !isPaid && !bsOpen && (
+      {!isPaid && (
         <FloatingCTA
-          onPayment={handlePayment}
-          starCount={data.posts.length}
+          visible={phase === 'explore' && !bsOpen}
+          onPay={handlePayment}
           offsetBottom={tappedStars.size > 0 ? 100 : 16}
         />
       )}

@@ -27,6 +27,8 @@ export interface PostData {
   date: string; // ISO string
   hour: number;
   tags: string[];
+  displayUrl?: string;  // Instagram CDN image URL
+  postUrl?: string;     // Instagram original post link
 }
 
 // ===== Universe Type =====
@@ -165,6 +167,7 @@ export interface InstagramPost {
   timestamp: string;
   type: string;
   url: string;
+  displayUrl?: string;  // Instagram CDN image URL
 }
 
 export interface PaymentRow {
