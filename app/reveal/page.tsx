@@ -6,6 +6,71 @@ import { loadMockData, FREE_INSIGHTS, PERSONALITY_KEYWORDS, EMOTION_TEASERS } fr
 import type { MockResult, PostData } from '@/lib/types';
 import { CATEGORIES } from '@/lib/types';
 
+// ===== Starfield Background =====
+function StarfieldBg() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const w = innerWidth;
+    const h = 3000; // tall for scrolling
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
+
+    interface Star { x: number; y: number; r: number; a: number; sp: number; ph: number }
+    const stars: Star[] = [];
+    for (let i = 0; i < 400; i++) {
+      const layer = Math.random();
+      stars.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: layer < 0.7 ? Math.random() * 0.3 + 0.05 : layer < 0.95 ? Math.random() * 0.6 + 0.2 : Math.random() * 1.2 + 0.4,
+        a: layer < 0.7 ? Math.random() * 0.12 + 0.03 : layer < 0.95 ? Math.random() * 0.25 + 0.08 : Math.random() * 0.4 + 0.2,
+        sp: Math.random() * 0.003 + 0.001,
+        ph: Math.random() * Math.PI * 2,
+      });
+    }
+
+    let animId: number;
+    function draw(t: number) {
+      animId = requestAnimationFrame(draw);
+      ctx!.clearRect(0, 0, w, h);
+
+      stars.forEach(s => {
+        const tw = 0.4 + 0.6 * Math.sin(t * s.sp + s.ph);
+        const alpha = s.a * tw;
+
+        if (s.r > 0.8) {
+          const g = ctx!.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 5);
+          g.addColorStop(0, `rgba(210,190,240,${alpha * 0.2})`);
+          g.addColorStop(1, 'transparent');
+          ctx!.fillStyle = g;
+          ctx!.beginPath();
+          ctx!.arc(s.x, s.y, s.r * 5, 0, Math.PI * 2);
+          ctx!.fill();
+        }
+
+        ctx!.fillStyle = `rgba(220,210,240,${alpha})`;
+        ctx!.beginPath();
+        ctx!.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx!.fill();
+      });
+    }
+
+    animId = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute top-0 left-0 pointer-events-none" style={{ zIndex: 0 }} />;
+}
+
 // ===== Rich Mini Universe Preview =====
 function MiniUniverse({ posts }: { posts: PostData[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,7 +92,6 @@ function MiniUniverse({ posts }: { posts: PostData[] }) {
     if (!cx) return;
     cx.scale(dpr, dpr);
 
-    // Group posts by category
     const groups: Record<string, PostData[]> = {};
     posts.forEach(p => {
       if (!groups[p.cat.name]) groups[p.cat.name] = [];
@@ -38,19 +102,9 @@ function MiniUniverse({ posts }: { posts: PostData[] }) {
     const angleStep = (Math.PI * 2) / gk.length;
     const gR = Math.min(cw, ch) * 0.22;
 
-    interface MiniStar {
-      x: number; y: number; s: number;
-      c: { r: number; g: number; b: number };
-      ph: number; sp: number;
-    }
-    interface MiniNebula {
-      x: number; y: number; r: number;
-      c: { r: number; g: number; b: number }; a: number;
-    }
-    interface MiniEdge {
-      x1: number; y1: number; x2: number; y2: number;
-      c: { r: number; g: number; b: number };
-    }
+    interface MiniStar { x: number; y: number; s: number; c: { r: number; g: number; b: number }; ph: number; sp: number }
+    interface MiniNebula { x: number; y: number; r: number; c: { r: number; g: number; b: number }; a: number }
+    interface MiniEdge { x1: number; y1: number; x2: number; y2: number; c: { r: number; g: number; b: number } }
 
     const stars: MiniStar[] = [];
     const nebulae: MiniNebula[] = [];
@@ -62,17 +116,10 @@ function MiniUniverse({ posts }: { posts: PostData[] }) {
       const gy = ch / 2 + Math.sin(ang) * gR;
       const cat = CATEGORIES.find(c => c.name === k) || CATEGORIES[2];
 
-      // Nebula glow per cluster
       nebulae.push({ x: gx, y: gy, r: 55 + groups[k].length * 2, c: cat, a: 0.08 });
-      // Surrounding wisps
       for (let w = 0; w < 3; w++) {
         const wa = Math.random() * Math.PI * 2;
-        nebulae.push({
-          x: gx + Math.cos(wa) * 25,
-          y: gy + Math.sin(wa) * 25,
-          r: 20 + Math.random() * 30,
-          c: cat, a: 0.04 + Math.random() * 0.03,
-        });
+        nebulae.push({ x: gx + Math.cos(wa) * 25, y: gy + Math.sin(wa) * 25, r: 20 + Math.random() * 30, c: cat, a: 0.04 + Math.random() * 0.03 });
       }
 
       const groupStars: MiniStar[] = [];
@@ -81,119 +128,52 @@ function MiniUniverse({ posts }: { posts: PostData[] }) {
         const sa = (Math.PI * 2 / groups[k].length) * pi + Math.random() * 0.5;
         const sr = Math.random() * spread + 3;
         const star: MiniStar = {
-          x: gx + Math.cos(sa) * sr,
-          y: gy + Math.sin(sa) * sr,
-          s: 1.2 + (post.likes / 800) * 2.5,
-          c: cat, ph: Math.random() * Math.PI * 2,
-          sp: Math.random() * 0.012 + 0.005,
+          x: gx + Math.cos(sa) * sr, y: gy + Math.sin(sa) * sr,
+          s: 1.2 + (post.likes / 800) * 2.5, c: cat,
+          ph: Math.random() * Math.PI * 2, sp: Math.random() * 0.012 + 0.005,
         };
         stars.push(star);
         groupStars.push(star);
       });
 
-      // Constellation edges within cluster
       for (let i = 0; i < groupStars.length - 1; i++) {
-        const a = groupStars[i];
-        const b = groupStars[i + 1];
-        if (Math.hypot(a.x - b.x, a.y - b.y) < 40) {
-          edges.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, c: cat });
-        }
+        const a = groupStars[i]; const b = groupStars[i + 1];
+        if (Math.hypot(a.x - b.x, a.y - b.y) < 40) edges.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, c: cat });
       }
     });
 
-    // Dust
     const dust: { x: number; y: number; r: number; a: number; sp: number; ph: number }[] = [];
     for (let i = 0; i < 150; i++) {
-      dust.push({
-        x: Math.random() * cw, y: Math.random() * ch,
-        r: Math.random() * 0.3 + 0.05,
-        a: Math.random() * 0.12 + 0.03,
-        sp: Math.random() * 0.008 + 0.003,
-        ph: Math.random() * Math.PI * 2,
-      });
+      dust.push({ x: Math.random() * cw, y: Math.random() * ch, r: Math.random() * 0.3 + 0.05, a: Math.random() * 0.12 + 0.03, sp: Math.random() * 0.008 + 0.003, ph: Math.random() * Math.PI * 2 });
     }
 
     let animId: number;
     function draw(t: number) {
       animId = requestAnimationFrame(draw);
       cx!.clearRect(0, 0, cw, ch);
-
-      // Background gradient
       const bg = cx!.createRadialGradient(cw * .4, ch * .35, 0, cw * .5, ch * .5, cw * .6);
-      bg.addColorStop(0, 'rgba(15,12,40,.5)');
-      bg.addColorStop(1, 'transparent');
-      cx!.fillStyle = bg;
-      cx!.fillRect(0, 0, cw, ch);
+      bg.addColorStop(0, 'rgba(15,12,40,.5)'); bg.addColorStop(1, 'transparent');
+      cx!.fillStyle = bg; cx!.fillRect(0, 0, cw, ch);
 
-      // Nebulae
-      nebulae.forEach(n => {
-        const g = cx!.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
-        g.addColorStop(0, `rgba(${n.c.r},${n.c.g},${n.c.b},${n.a})`);
-        g.addColorStop(0.5, `rgba(${n.c.r},${n.c.g},${n.c.b},${n.a * 0.35})`);
-        g.addColorStop(1, 'transparent');
-        cx!.fillStyle = g;
-        cx!.beginPath();
-        cx!.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        cx!.fill();
-      });
+      nebulae.forEach(n => { const g = cx!.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r); g.addColorStop(0, `rgba(${n.c.r},${n.c.g},${n.c.b},${n.a})`); g.addColorStop(0.5, `rgba(${n.c.r},${n.c.g},${n.c.b},${n.a * 0.35})`); g.addColorStop(1, 'transparent'); cx!.fillStyle = g; cx!.beginPath(); cx!.arc(n.x, n.y, n.r, 0, Math.PI * 2); cx!.fill(); });
+      dust.forEach(d => { const a = d.a * (0.4 + 0.6 * Math.sin(t * d.sp + d.ph)); cx!.fillStyle = `rgba(200,190,230,${a})`; cx!.beginPath(); cx!.arc(d.x, d.y, d.r, 0, Math.PI * 2); cx!.fill(); });
+      edges.forEach(e => { const tw = 0.25 + 0.15 * Math.sin(t * 0.003); cx!.strokeStyle = `rgba(${e.c.r},${e.c.g},${e.c.b},${tw * 0.15})`; cx!.lineWidth = 0.4; cx!.beginPath(); cx!.moveTo(e.x1, e.y1); cx!.lineTo(e.x2, e.y2); cx!.stroke(); });
 
-      // Dust
-      dust.forEach(d => {
-        const a = d.a * (0.4 + 0.6 * Math.sin(t * d.sp + d.ph));
-        cx!.fillStyle = `rgba(200,190,230,${a})`;
-        cx!.beginPath();
-        cx!.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-        cx!.fill();
-      });
-
-      // Constellation lines
-      edges.forEach(e => {
-        const tw = 0.25 + 0.15 * Math.sin(t * 0.003);
-        cx!.strokeStyle = `rgba(${e.c.r},${e.c.g},${e.c.b},${tw * 0.15})`;
-        cx!.lineWidth = 0.4;
-        cx!.beginPath();
-        cx!.moveTo(e.x1, e.y1);
-        cx!.lineTo(e.x2, e.y2);
-        cx!.stroke();
-      });
-
-      // Stars with glow
       stars.forEach(s => {
         const tw = 0.5 + 0.5 * Math.sin(t * s.sp + s.ph);
-
-        // Color halo
         const g0 = cx!.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.s * 5);
-        g0.addColorStop(0, `rgba(${s.c.r},${s.c.g},${s.c.b},${tw * 0.12})`);
-        g0.addColorStop(1, 'transparent');
-        cx!.fillStyle = g0;
-        cx!.beginPath();
-        cx!.arc(s.x, s.y, s.s * 5, 0, Math.PI * 2);
-        cx!.fill();
-
-        // Inner glow
+        g0.addColorStop(0, `rgba(${s.c.r},${s.c.g},${s.c.b},${tw * 0.12})`); g0.addColorStop(1, 'transparent');
+        cx!.fillStyle = g0; cx!.beginPath(); cx!.arc(s.x, s.y, s.s * 5, 0, Math.PI * 2); cx!.fill();
         const g1 = cx!.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.s * 2);
-        g1.addColorStop(0, `rgba(${s.c.r},${s.c.g},${s.c.b},${tw * 0.35})`);
-        g1.addColorStop(1, 'transparent');
-        cx!.fillStyle = g1;
-        cx!.beginPath();
-        cx!.arc(s.x, s.y, s.s * 2, 0, Math.PI * 2);
-        cx!.fill();
-
-        // Core
-        cx!.fillStyle = `rgba(255,255,255,${0.4 + tw * 0.5})`;
-        cx!.beginPath();
-        cx!.arc(s.x, s.y, s.s * 0.4, 0, Math.PI * 2);
-        cx!.fill();
+        g1.addColorStop(0, `rgba(${s.c.r},${s.c.g},${s.c.b},${tw * 0.35})`); g1.addColorStop(1, 'transparent');
+        cx!.fillStyle = g1; cx!.beginPath(); cx!.arc(s.x, s.y, s.s * 2, 0, Math.PI * 2); cx!.fill();
+        cx!.fillStyle = `rgba(255,255,255,${0.4 + tw * 0.5})`; cx!.beginPath(); cx!.arc(s.x, s.y, s.s * 0.4, 0, Math.PI * 2); cx!.fill();
       });
 
-      // Vignette
       const vig = cx!.createRadialGradient(cw / 2, ch / 2, cw * .2, cw / 2, ch / 2, cw * .6);
-      vig.addColorStop(0, 'transparent');
-      vig.addColorStop(1, 'rgba(12,8,24,.5)');
-      cx!.fillStyle = vig;
-      cx!.fillRect(0, 0, cw, ch);
+      vig.addColorStop(0, 'transparent'); vig.addColorStop(1, 'rgba(12,8,24,.5)');
+      cx!.fillStyle = vig; cx!.fillRect(0, 0, cw, ch);
     }
-
     animId = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(animId);
   }, [posts]);
@@ -205,15 +185,10 @@ function MiniUniverse({ posts }: { posts: PostData[] }) {
 function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: string }) {
   const [val, setVal] = useState(0);
   useEffect(() => {
-    let start = 0;
-    const dur = 1200;
-    const t0 = Date.now();
+    const dur = 1200; const t0 = Date.now();
     const step = () => {
-      const elapsed = Date.now() - t0;
-      const p = Math.min(elapsed / dur, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      start = Math.round(target * eased);
-      setVal(start);
+      const p = Math.min((Date.now() - t0) / dur, 1);
+      setVal(Math.round(target * (1 - Math.pow(1 - p, 3))));
       if (p < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
@@ -226,10 +201,7 @@ function TimeDistBar({ posts }: { posts: PostData[] }) {
   const dist = useMemo(() => {
     const bins = { dawn: 0, morning: 0, afternoon: 0, evening: 0 };
     posts.forEach(p => {
-      if (p.hour < 6) bins.dawn++;
-      else if (p.hour < 12) bins.morning++;
-      else if (p.hour < 18) bins.afternoon++;
-      else bins.evening++;
+      if (p.hour < 6) bins.dawn++; else if (p.hour < 12) bins.morning++; else if (p.hour < 18) bins.afternoon++; else bins.evening++;
     });
     const total = posts.length;
     return [
@@ -239,10 +211,8 @@ function TimeDistBar({ posts }: { posts: PostData[] }) {
       { label: '저녁', pct: Math.round(bins.evening / total * 100), color: '#8b5cf6' },
     ];
   }, [posts]);
-
   const [animate, setAnimate] = useState(false);
   useEffect(() => { setTimeout(() => setAnimate(true), 500); }, []);
-
   return (
     <div className="flex gap-1 w-full" style={{ height: 64 }}>
       {dist.map((d, i) => (
@@ -263,28 +233,69 @@ function TimeDistBar({ posts }: { posts: PostData[] }) {
 function PersonalityPills({ keywords, delay = 0 }: { keywords: string[]; delay?: number }) {
   const [show, setShow] = useState(false);
   useEffect(() => { setTimeout(() => setShow(true), delay); }, [delay]);
-
   return (
     <div className="flex flex-wrap gap-1.5 justify-center">
       {keywords.map((kw, i) => (
-        <span
-          key={i}
-          className="rounded-full"
-          style={{
-            fontSize: '.75rem',
-            fontWeight: 300,
-            padding: '5px 14px',
-            background: 'rgba(210,160,200,.06)',
-            border: '1px solid rgba(210,160,200,.1)',
-            color: 'rgba(248,244,255,.55)',
-            opacity: show ? 1 : 0,
-            transform: show ? 'scale(1)' : 'scale(0.8)',
-            transition: `all .6s ${i * 0.12 + 0.1}s cubic-bezier(.16,1,.3,1)`,
-          }}
-        >
+        <span key={i} className="rounded-full" style={{
+          fontSize: '.75rem', fontWeight: 300, padding: '5px 14px',
+          background: 'rgba(210,160,200,.06)', border: '1px solid rgba(210,160,200,.1)',
+          color: 'rgba(248,244,255,.55)', opacity: show ? 1 : 0,
+          transform: show ? 'scale(1)' : 'scale(0.8)',
+          transition: `all .6s ${i * 0.12 + 0.1}s cubic-bezier(.16,1,.3,1)`,
+        }}>
           {kw}
         </span>
       ))}
+    </div>
+  );
+}
+
+// ===== Real Post Preview Card =====
+function RealPostCard({ post, index }: { post: PostData; index: number }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { setTimeout(() => setVisible(true), 300 + index * 150); }, [index]);
+  const imgUrl = post.displayUrl ? `/api/img-proxy?url=${encodeURIComponent(post.displayUrl)}` : null;
+
+  return (
+    <div className="flex-shrink-0 rounded-xl overflow-hidden" style={{
+      width: 200, minWidth: 200,
+      background: 'rgba(255,255,255,.02)',
+      border: '1px solid rgba(255,255,255,.06)',
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0)' : 'translateY(12px)',
+      transition: `all .6s ${index * 0.1}s cubic-bezier(.16,1,.3,1)`,
+    }}>
+      {/* Image */}
+      {imgUrl ? (
+        <div style={{ width: '100%', aspectRatio: '4/3', overflow: 'hidden', background: `rgba(${post.cat.r},${post.cat.g},${post.cat.b},.08)` }}>
+          <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={(e) => {
+              const el = e.target as HTMLImageElement;
+              if (!el.dataset.retried && post.displayUrl) {
+                el.dataset.retried = '1'; el.src = post.displayUrl;
+              } else { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }
+            }} />
+        </div>
+      ) : (
+        <div style={{ width: '100%', height: 60, background: `linear-gradient(135deg, rgba(${post.cat.r},${post.cat.g},${post.cat.b},.1), rgba(${post.cat.r},${post.cat.g},${post.cat.b},.03))` }} />
+      )}
+      {/* Content */}
+      <div style={{ padding: '10px 12px' }}>
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <span className="rounded-full" style={{ width: 5, height: 5, background: post.cat.hex }} />
+          <span style={{ fontSize: '.65rem', fontWeight: 300, color: post.cat.hex + 'aa' }}>{post.cat.name}</span>
+          <span style={{ fontSize: '.62rem', fontWeight: 300, color: 'rgba(248,244,255,.25)', marginLeft: 'auto' }}>
+            &#9829; {post.likes}
+          </span>
+        </div>
+        <p style={{
+          fontSize: '.75rem', fontWeight: 300, color: 'rgba(248,244,255,.55)',
+          lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        }}>
+          {post.caption || '(캡션 없음)'}
+        </p>
+      </div>
     </div>
   );
 }
@@ -297,7 +308,6 @@ function RevealContent() {
   const [data, setData] = useState<MockResult | null>(null);
   const [visible, setVisible] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stored = loadMockData();
@@ -310,7 +320,6 @@ function RevealContent() {
     router.push(`/universe/demo?username=${encodeURIComponent(username)}`);
   };
 
-  // Derived data
   const analysis = useMemo(() => {
     if (!data) return null;
     const posts = data.posts;
@@ -320,26 +329,14 @@ function RevealContent() {
     const topPct = Math.round(sorted[0][1] / posts.length * 100);
     const secondCat = sorted.length > 1 ? sorted[1][0] : null;
     const secondPct = sorted.length > 1 ? Math.round(sorted[1][1] / posts.length * 100) : 0;
-
-    // Time analysis
     const evPosts = posts.filter(p => p.hour >= 19).length;
     const evPct = Math.round(evPosts / posts.length * 100);
-    const peakHour = (() => {
-      const hourBins: number[] = Array(24).fill(0);
-      posts.forEach(p => hourBins[p.hour]++);
-      return hourBins.indexOf(Math.max(...hourBins));
-    })();
-
-    // Top liked post
     const topPost = posts.reduce((a, b) => a.likes > b.likes ? a : b, posts[0]);
-
-    // Personality keywords
     const keywords = PERSONALITY_KEYWORDS[data.topCategory] || PERSONALITY_KEYWORDS['일상'];
-
-    // Emotion teaser
     const emotionTeaser = EMOTION_TEASERS[data.topCategory] || EMOTION_TEASERS['일상'];
-
-    return { sorted, topPct, secondCat, secondPct, evPct, peakHour, topPost, keywords, emotionTeaser };
+    // Top posts for preview (sorted by likes, take top 8)
+    const topPosts = [...posts].sort((a, b) => b.likes - a.likes).slice(0, 8);
+    return { sorted, topPct, secondCat, secondPct, evPct, topPost, keywords, emotionTeaser, topPosts };
   }, [data]);
 
   if (!data || !analysis) {
@@ -356,13 +353,15 @@ function RevealContent() {
 
   return (
     <div
-      ref={scrollRef}
       className="fixed inset-0 z-[120] overflow-y-auto"
       style={{
         background: 'radial-gradient(ellipse at 50% 20%, #1a1038, #0c0818 65%)',
         WebkitOverflowScrolling: 'touch',
       }}
     >
+      {/* Animated starfield background */}
+      <StarfieldBg />
+
       {/* Back button */}
       <button
         onClick={() => router.push('/')}
@@ -378,10 +377,9 @@ function RevealContent() {
       </button>
 
       <div
-        className="mx-auto flex flex-col items-center text-center"
+        className="mx-auto flex flex-col items-center text-center relative"
         style={{
-          maxWidth: 380,
-          padding: '48px 22px 60px',
+          maxWidth: 380, padding: '48px 22px 60px', zIndex: 1,
           opacity: visible ? 1 : 0,
           transform: visible ? 'translateY(0)' : 'translateY(20px)',
           transition: 'opacity 1s .15s, transform 1s .15s',
@@ -395,10 +393,9 @@ function RevealContent() {
           your universe type
         </p>
 
-        {/* Type name - the hero */}
+        {/* Type name */}
         <h1 className="font-brand italic font-normal mt-3 mb-2" style={{
-          fontSize: 'clamp(1.8rem, 6vw, 2.4rem)',
-          color: 'rgba(248,244,255,.88)',
+          fontSize: 'clamp(1.8rem, 6vw, 2.4rem)', color: 'rgba(248,244,255,.88)',
         }}>
           {data.userType.type}
         </h1>
@@ -406,12 +403,10 @@ function RevealContent() {
         {/* Rarity badge */}
         <div className="flex items-center gap-1.5 mb-4" style={{
           padding: '4px 12px', borderRadius: 20,
-          background: 'rgba(210,160,200,.08)',
-          border: '1px solid rgba(210,160,200,.12)',
+          background: 'rgba(210,160,200,.08)', border: '1px solid rgba(210,160,200,.12)',
         }}>
           <span className="inline-block rounded-full" style={{
-            width: 5, height: 5,
-            background: 'rgba(210,160,200,.6)',
+            width: 5, height: 5, background: 'rgba(210,160,200,.6)',
             boxShadow: '0 0 6px rgba(210,160,200,.4)',
           }} />
           <span style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(210,160,200,.6)' }}>
@@ -431,6 +426,32 @@ function RevealContent() {
           {data.userType.description}
         </p>
 
+        {/* ===== YOUR REAL POSTS - scrollable cards ===== */}
+        <div className="w-full mb-6 text-left">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="rounded-full" style={{
+              width: 6, height: 6, background: 'rgba(210,160,200,.5)',
+              boxShadow: '0 0 8px rgba(210,160,200,.3)',
+            }} />
+            <p className="font-brand italic" style={{
+              fontSize: '.88rem', color: 'rgba(210,160,200,.6)', letterSpacing: '.04em',
+            }}>
+              수집된 게시물 미리보기
+            </p>
+          </div>
+          <div className="flex gap-2.5 overflow-x-auto pb-2" style={{
+            scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+            marginLeft: -22, marginRight: -22, paddingLeft: 22, paddingRight: 22,
+          }}>
+            {analysis.topPosts.map((post, i) => (
+              <RealPostCard key={post.id} post={post} index={i} />
+            ))}
+          </div>
+          <p className="mt-2 text-center" style={{ fontSize: '.7rem', fontWeight: 300, color: 'rgba(248,244,255,.2)' }}>
+            ← 스와이프하여 더 보기 →
+          </p>
+        </div>
+
         {/* ===== Top Category Spotlight ===== */}
         <div className="w-full rounded-2xl text-left mb-5" style={{
           padding: '20px 20px',
@@ -439,9 +460,7 @@ function RevealContent() {
         }}>
           <div className="flex items-center gap-2 mb-3">
             <span className="rounded-full" style={{ width: 8, height: 8, background: topCatColor, boxShadow: `0 0 8px ${topCatColor}60` }} />
-            <p style={{ fontSize: '.82rem', fontWeight: 400, color: topCatColor + 'cc' }}>
-              가장 큰 별자리
-            </p>
+            <p style={{ fontSize: '.82rem', fontWeight: 400, color: topCatColor + 'cc' }}>가장 큰 별자리</p>
           </div>
           <p className="font-brand italic font-normal mb-1" style={{ fontSize: '1.3rem', color: 'rgba(248,244,255,.8)' }}>
             {data.topCategory}
@@ -481,8 +500,7 @@ function RevealContent() {
         {/* ===== Time Pattern Teaser ===== */}
         <div className="w-full rounded-2xl text-left mb-5" style={{
           padding: '20px 20px',
-          background: 'rgba(255,255,255,.012)',
-          border: '1px solid rgba(255,255,255,.05)',
+          background: 'rgba(255,255,255,.012)', border: '1px solid rgba(255,255,255,.05)',
         }}>
           <p className="font-brand italic mb-3" style={{
             fontSize: '.82rem', color: 'rgba(210,160,200,.45)', letterSpacing: '.06em',
@@ -495,7 +513,7 @@ function RevealContent() {
               게시물의 <span style={{ color: '#8b5cf6', fontWeight: 400 }}>{analysis.evPct}%</span>가 저녁 이후에 집중
             </p>
             <p className="mt-1 flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.3)' }}>
-              <span style={{ opacity: 0.5 }}>🔒</span>
+              <span style={{ opacity: 0.5 }}>&#128274;</span>
               이 패턴이 의미하는 것은...
             </p>
           </div>
@@ -503,19 +521,14 @@ function RevealContent() {
 
         {/* ===== Blurred Universe Preview ===== */}
         <div className="w-full rounded-2xl overflow-hidden relative mb-5" style={{
-          aspectRatio: '1',
-          background: '#0c0818',
-          border: '1px solid rgba(210,160,200,.06)',
+          aspectRatio: '1', background: '#0c0818', border: '1px solid rgba(210,160,200,.06)',
         }}>
           <MiniUniverse posts={data.posts} />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2" style={{
-            backdropFilter: 'blur(3px)',
-            WebkitBackdropFilter: 'blur(3px)',
+            backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)',
             background: 'radial-gradient(ellipse at center, rgba(12,8,24,.05), rgba(12,8,24,.3) 80%)',
           }}>
-            <p className="font-brand italic font-normal" style={{
-              fontSize: '1.15rem', color: 'rgba(248,244,255,.75)',
-            }}>
+            <p className="font-brand italic font-normal" style={{ fontSize: '1.15rem', color: 'rgba(248,244,255,.75)' }}>
               당신의 우주가 완성되었어요
             </p>
             <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.4)' }}>
@@ -527,47 +540,36 @@ function RevealContent() {
         {/* ===== Stats summary ===== */}
         <div className="w-full grid grid-cols-4 gap-1.5 mb-5">
           {[
-            { n: starCount, l: '게시물' },
-            { n: data.categoryCount, l: '카테고리' },
-            { n: data.topLikes, l: '최고 ♥' },
-            { n: data.streakDays, l: '활동일' },
+            { n: starCount, l: '게시물' }, { n: data.categoryCount, l: '카테고리' },
+            { n: data.topLikes, l: '최고 &#9829;' }, { n: data.streakDays, l: '활동일' },
           ].map((s, i) => (
             <div key={i} className="rounded-xl text-center" style={{
-              padding: '12px 4px',
-              background: 'rgba(255,255,255,.015)',
-              border: '1px solid rgba(255,255,255,.04)',
+              padding: '12px 4px', background: 'rgba(255,255,255,.015)', border: '1px solid rgba(255,255,255,.04)',
             }}>
               <div className="font-brand" style={{ fontSize: '1rem', color: 'rgba(248,244,255,.65)' }}>
                 {typeof s.n === 'number' ? <AnimatedNumber target={s.n} /> : s.n}
               </div>
-              <div style={{ fontSize: '.62rem', fontWeight: 300, color: 'rgba(248,244,255,.3)' }}>
-                {s.l}
-              </div>
+              <div style={{ fontSize: '.62rem', fontWeight: 300, color: 'rgba(248,244,255,.3)' }}
+                dangerouslySetInnerHTML={{ __html: s.l }} />
             </div>
           ))}
         </div>
 
         {/* ===== Best Moment Teaser ===== */}
         <div className="w-full rounded-2xl text-left mb-5" style={{
-          padding: '18px 20px',
-          background: 'rgba(255,255,255,.012)',
-          border: '1px solid rgba(255,255,255,.05)',
+          padding: '18px 20px', background: 'rgba(255,255,255,.012)', border: '1px solid rgba(255,255,255,.05)',
         }}>
           <div className="flex items-center justify-between mb-2">
-            <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(248,244,255,.45)' }}>
-              가장 빛났던 순간
-            </p>
+            <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(248,244,255,.45)' }}>가장 빛났던 순간</p>
             <span style={{ fontSize: '.82rem', color: 'rgba(235,130,175,.5)' }}>
               &#9829; <AnimatedNumber target={analysis.topPost.likes} />
             </span>
           </div>
-          <p className="font-light mb-2" style={{
-            fontSize: '.9rem', color: 'rgba(248,244,255,.6)', lineHeight: 1.7,
-          }}>
-            &ldquo;{analysis.topPost.caption.substring(0, 30)}{analysis.topPost.caption.length > 30 ? '...' : ''}&rdquo;
+          <p className="font-light mb-2" style={{ fontSize: '.9rem', color: 'rgba(248,244,255,.6)', lineHeight: 1.7 }}>
+            &ldquo;{analysis.topPost.caption.substring(0, 50)}{analysis.topPost.caption.length > 50 ? '...' : ''}&rdquo;
           </p>
           <p className="flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.3)' }}>
-            <span style={{ opacity: 0.5 }}>🔒</span>
+            <span style={{ opacity: 0.5 }}>&#128274;</span>
             이 게시물이 빛난 이유 &middot; AI 분석
           </p>
         </div>
@@ -583,18 +585,16 @@ function RevealContent() {
           }}>
             감정 패턴 프리뷰
           </p>
-          <p className="font-light" style={{
-            fontSize: '.88rem', color: 'rgba(248,244,255,.5)', lineHeight: 1.7,
-          }}>
+          <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.5)', lineHeight: 1.7 }}>
             {analysis.emotionTeaser}
           </p>
           <p className="mt-2 flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.25)' }}>
-            <span style={{ opacity: 0.5 }}>🔒</span>
+            <span style={{ opacity: 0.5 }}>&#128274;</span>
             전체 감정 패턴 분석 보기
           </p>
         </div>
 
-        {/* ===== Locked insights - creates FOMO ===== */}
+        {/* ===== Locked insights ===== */}
         <div className="w-full mb-5">
           <p className="text-left mb-3" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(248,244,255,.4)' }}>
             잠금 해제 시 공개될 콘텐츠
@@ -602,32 +602,24 @@ function RevealContent() {
           <div className="flex flex-col gap-2">
             {data.userType.locked.map((lock, i) => (
               <div key={i} className="flex items-center gap-3 text-left rounded-xl" style={{
-                padding: '14px 16px',
-                background: 'rgba(255,255,255,.015)',
-                border: '1px solid rgba(255,255,255,.05)',
+                padding: '14px 16px', background: 'rgba(255,255,255,.015)', border: '1px solid rgba(255,255,255,.05)',
               }}>
-                <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
-                <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.5)' }}>
-                  {lock}
-                </span>
+                <span style={{ fontSize: '1rem', opacity: 0.5 }}>&#128274;</span>
+                <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.5)' }}>{lock}</span>
               </div>
             ))}
             <div className="flex items-center gap-3 text-left rounded-xl" style={{
-              padding: '14px 16px',
-              background: 'rgba(255,255,255,.015)',
-              border: '1px solid rgba(255,255,255,.05)',
+              padding: '14px 16px', background: 'rgba(255,255,255,.015)', border: '1px solid rgba(255,255,255,.05)',
             }}>
-              <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
+              <span style={{ fontSize: '1rem', opacity: 0.5 }}>&#128274;</span>
               <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.5)' }}>
                 {starCount}개 별 하나하나의 AI 인사이트
               </span>
             </div>
             <div className="flex items-center gap-3 text-left rounded-xl" style={{
-              padding: '14px 16px',
-              background: 'rgba(210,160,200,.03)',
-              border: '1px solid rgba(210,160,200,.08)',
+              padding: '14px 16px', background: 'rgba(210,160,200,.03)', border: '1px solid rgba(210,160,200,.08)',
             }}>
-              <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
+              <span style={{ fontSize: '1rem', opacity: 0.5 }}>&#128274;</span>
               <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(210,160,200,.5)' }}>
                 우주 DNA 리포트 + 성격 심층 분석
               </span>
@@ -637,15 +629,14 @@ function RevealContent() {
 
         {/* ===== Social Proof ===== */}
         <div className="w-full text-center mb-6" style={{
-          opacity: showDetail ? 1 : 0,
-          transition: 'opacity .8s',
+          opacity: showDetail ? 1 : 0, transition: 'opacity .8s',
         }}>
           <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.25)' }}>
             지금까지 <span style={{ color: 'rgba(210,160,200,.5)' }}>2,847명</span>이 자신의 우주를 탐험했어요
           </p>
         </div>
 
-        {/* CTA Button - The hero action */}
+        {/* CTA Button */}
         <button
           onClick={handlePay}
           className="w-full rounded-xl cursor-pointer transition-all active:scale-[.98]"
@@ -654,10 +645,8 @@ function RevealContent() {
             background: 'linear-gradient(135deg, rgba(210,160,200,.35), rgba(120,140,220,.3))',
             border: '1px solid rgba(210,160,200,.3)',
             boxShadow: '0 4px 30px rgba(210,160,200,.15), 0 0 60px rgba(210,160,200,.06)',
-            color: 'rgba(248,244,255,.95)',
-            fontSize: '1.08rem',
-            fontWeight: 400,
-            letterSpacing: '.02em',
+            color: 'rgba(248,244,255,.95)', fontSize: '1.08rem',
+            fontWeight: 400, letterSpacing: '.02em',
             WebkitTapHighlightColor: 'transparent',
           }}
         >

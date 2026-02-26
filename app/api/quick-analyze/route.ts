@@ -122,31 +122,144 @@ function convertToPostData(post: InstagramPost, index: number) {
   };
 }
 
-// Simple keyword-based categorization
+// Robust keyword-based categorization with weighted scoring
 function categorizePost(caption: string, hashtags: string[]) {
-  const text = `${caption} ${hashtags.join(" ")}`.toLowerCase();
+  const captionLower = caption.toLowerCase();
+  const hashText = hashtags.join(" ").toLowerCase();
 
-  const rules: [string, string[]][] = [
-    ["여행", ["travel", "trip", "여행", "vacation", "해외", "공항", "비행", "tourist", "journey", "backpack"]],
-    ["음식", ["food", "eat", "맛집", "먹스타그램", "맛스타그램", "yummy", "delicious", "recipe", "cooking", "밥", "디저트", "브런치"]],
-    ["패션", ["fashion", "style", "패션", "코디", "outfit", "ootd", "dailylook", "옷", "착샷", "빈티지"]],
-    ["운동", ["fitness", "gym", "운동", "workout", "헬스", "running", "yoga", "pilates", "swimming", "crossfit"]],
-    ["카페", ["cafe", "coffee", "카페", "커피", "라떼", "아메리카노", "핸드드립"]],
-    ["야경", ["night", "야경", "sunset", "sunrise", "노을", "일출", "밤", "루프탑", "별"]],
-    ["반려동물", ["pet", "dog", "cat", "반려", "강아지", "고양이", "멍멍", "냥", "puppy", "뭉이"]],
-    ["일상", ["daily", "일상", "selfie", "셀카", "주말", "weekend", "하루", "오늘", "mood"]],
+  // Expanded keyword rules: [category, caption_keywords, hashtag_keywords]
+  // Hashtag matches are weighted 3x because they're explicit signals
+  const rules: [string, string[], string[]][] = [
+    ["여행", [
+      "여행", "해외여행", "국내여행", "공항", "비행기", "항공", "호텔", "리조트", "숙소", "관광",
+      "투어", "배낭여행", "자유여행", "유럽", "일본", "동남아", "미국", "제주", "제주도", "부산",
+      "강릉", "속초", "경주", "해변", "바다", "섬", "하이킹", "트레킹", "관광통역", "가이드",
+      "travel", "trip", "vacation", "journey", "backpack", "tourist", "sightseeing", "wanderlust",
+      "explore", "adventure", "flight", "airport", "hotel", "resort", "beach", "island",
+    ], [
+      "여행", "여행스타그램", "여행에미치다", "해외여행", "국내여행", "제주여행", "부산여행",
+      "travel", "travelgram", "travelphotography", "wanderlust", "instatravel",
+      "travelblogger", "travelstagram", "vacation", "trip", "backpacking",
+    ]],
+    ["음식", [
+      "음식", "맛집", "밥", "점심", "저녁", "디저트", "브런치", "맛있", "먹방", "요리",
+      "레시피", "한식", "양식", "중식", "일식", "분식", "치킨", "피자", "파스타", "스시",
+      "라멘", "삼겹살", "고기", "소고기", "돼지고기", "회", "초밥", "떡볶이", "김밥",
+      "food", "eat", "yummy", "delicious", "recipe", "cooking", "foodie", "restaurant",
+      "dinner", "lunch", "breakfast", "brunch", "dessert", "cake", "pizza", "pasta", "sushi",
+    ], [
+      "맛집", "먹스타그램", "맛스타그램", "음식", "음식스타그램", "푸드", "푸드스타그램",
+      "맛집투어", "먹방", "요리", "디저트", "브런치", "카페맛집",
+      "food", "foodie", "foodporn", "foodstagram", "instafood", "yummy", "delicious",
+    ]],
+    ["패션", [
+      "패션", "코디", "옷", "착샷", "빈티지", "쇼핑", "패셔니스타", "스타일", "뷰티",
+      "메이크업", "화장품", "향수", "네일", "헤어", "악세사리", "주얼리", "가방", "신발",
+      "스니커즈", "원피스", "자켓", "코트", "니트",
+      "fashion", "style", "outfit", "styling", "beauty", "makeup", "cosmetics",
+      "skincare", "shopping", "vintage", "streetwear", "sneakers", "lookbook",
+    ], [
+      "패션", "코디", "데일리룩", "오오티디", "룩북", "패셔니스타", "스타일",
+      "ootd", "dailylook", "fashion", "style", "outfitoftheday", "fashionista",
+      "streetstyle", "lookbook", "fashionstyle", "instafashion",
+    ]],
+    ["운동", [
+      "운동", "헬스", "피트니스", "요가", "필라테스", "수영", "러닝", "마라톤", "크로스핏",
+      "근력", "다이어트", "건강", "등산", "자전거", "골프", "테니스", "축구", "농구",
+      "배드민턴", "클라이밍", "근육", "프로틴", "벌크업",
+      "fitness", "gym", "workout", "exercise", "running", "yoga", "pilates",
+      "swimming", "crossfit", "training", "marathon", "cycling", "golf", "tennis",
+      "muscle", "health",
+    ], [
+      "운동", "운동스타그램", "헬스", "헬스타그램", "피트니스", "요가", "필라테스",
+      "러닝", "마라톤", "골프", "등산", "다이어트",
+      "fitness", "gym", "workout", "fitnessmotivation", "gymlife", "fitlife",
+      "healthylifestyle", "running", "yoga", "crossfit",
+    ]],
+    ["카페", [
+      "카페", "커피", "라떼", "아메리카노", "핸드드립", "에스프레소", "카푸치노", "바리스타",
+      "베이커리", "빵", "브런치카페", "디저트카페", "카페거리",
+      "cafe", "coffee", "latte", "espresso", "cappuccino", "barista", "coffeeshop",
+    ], [
+      "카페", "카페스타그램", "커피", "커피스타그램", "카페투어", "카페맛집",
+      "아메리카노", "라떼", "핸드드립",
+      "cafe", "coffee", "coffeetime", "coffeelover", "coffeeshop", "instacoffee",
+    ]],
+    ["야경", [
+      "야경", "노을", "일출", "석양", "새벽", "뷰", "전망", "풍경", "자연", "꽃", "봄",
+      "여름", "가을", "겨울", "단풍", "벚꽃", "하늘", "구름", "루프탑", "별빛", "밤하늘",
+      "night", "nightview", "sunset", "sunrise", "view", "scenery", "landscape",
+      "nature", "sky", "clouds", "flowers", "cherry",
+    ], [
+      "야경", "노을", "일출", "풍경", "자연", "하늘", "꽃스타그램", "벚꽃",
+      "단풍", "풍경스타그램", "자연스타그램",
+      "sunset", "sunrise", "nightview", "landscape", "nature", "sky",
+      "naturephotography", "scenery",
+    ]],
+    ["반려동물", [
+      "강아지", "고양이", "반려", "멍멍", "야옹", "댕댕", "냥이", "뭉이", "산책",
+      "진돗개", "시바", "말티즈", "푸들", "골든리트리버", "코기", "랙돌", "브숏",
+      "펫", "애완", "사료", "간식", "동물병원", "입양",
+      "dog", "cat", "puppy", "kitten", "pet", "doglover", "catlover",
+    ], [
+      "강아지", "고양이", "반려동물", "반려견", "반려묘", "댕댕이", "냥이",
+      "펫스타그램", "멍스타그램", "냥스타그램", "강아지스타그램",
+      "dog", "cat", "pet", "puppy", "dogstagram", "catstagram", "dogsofinstagram",
+      "catsofinstagram", "petlover", "doglover", "catlover",
+    ]],
+    ["일상", [
+      "일상", "셀카", "주말", "하루", "오늘", "데일리", "소통", "일기", "기분", "생각",
+      "daily", "selfie", "weekend", "mood", "vibes", "life", "today", "love", "happy",
+    ], [
+      "일상", "데일리", "소통", "셀카", "셀스타그램", "일상스타그램", "좋아요",
+      "daily", "selfie", "instadaily", "lifestyle", "dailylife",
+    ]],
+  ];
+
+  // Emoji-based hints (strong signals)
+  const emojiMap: [string, string[]][] = [
+    ["반려동물", ["🐕", "🐶", "🐩", "🦮", "🐕‍🦺", "🐈", "🐱", "🐾", "🐰", "🐹", "🐠", "🦜"]],
+    ["음식", ["🍔", "🍕", "🍣", "🍜", "🍝", "🍗", "🍰", "🍩", "🧁", "🍦", "🍽", "🥘", "🥗", "🌮", "🍱"]],
+    ["여행", ["✈️", "🛫", "🏝", "🏖", "🗼", "🗽", "🏔", "⛰", "🧳", "🌍", "🌎", "🗺", "🚂", "🚢"]],
+    ["운동", ["💪", "🏋️", "🏃", "🧘", "⛹️", "🏌️", "🏊", "🚴", "⚽", "🏀", "🎾", "⛳"]],
+    ["카페", ["☕", "🍵", "🧋"]],
+    ["패션", ["👗", "👠", "👜", "💄", "💅", "👒", "🧥", "👟", "🕶", "💍"]],
+    ["야경", ["🌅", "🌄", "🌃", "🌉", "🌌", "🌸", "🌺", "🌻", "🍂", "🍁", "❄️", "⭐"]],
   ];
 
   let bestCat = "일상";
   let bestScore = 0;
 
-  for (const [catName, keywords] of rules) {
-    const score = keywords.filter((kw) => text.includes(kw)).length;
+  for (const [catName, captionKeywords, hashKeywords] of rules) {
+    let score = 0;
+
+    // Caption keyword matches (weight: 1 each)
+    for (const kw of captionKeywords) {
+      if (captionLower.includes(kw)) score += 1;
+    }
+
+    // Hashtag matches (weight: 3 each - hashtags are explicit intent signals)
+    for (const kw of hashKeywords) {
+      if (hashText.includes(kw)) score += 3;
+    }
+
+    // Emoji matches (weight: 2 each)
+    const emojiEntry = emojiMap.find(([name]) => name === catName);
+    if (emojiEntry) {
+      for (const emoji of emojiEntry[1]) {
+        if (caption.includes(emoji)) score += 2;
+      }
+    }
+
     if (score > bestScore) {
       bestScore = score;
       bestCat = catName;
     }
   }
+
+  // Only classify as non-일상 if there's meaningful signal (score >= 1)
+  // Otherwise default to 일상
+  if (bestScore < 1) bestCat = "일상";
 
   return CATEGORIES.find((c) => c.name === bestCat) || CATEGORIES[2];
 }
