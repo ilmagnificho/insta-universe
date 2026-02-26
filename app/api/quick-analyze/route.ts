@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { scrapeInstagramPosts } from "@/lib/apify";
+import { scrapeInstagramPosts, isApifyConfigured } from "@/lib/apify";
 import { CATEGORIES } from "@/lib/types";
 import type { InstagramPost } from "@/lib/types";
 
@@ -15,11 +15,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "username이 필요합니다" }, { status: 400 });
     }
 
+    // Check Apify configuration first
+    if (!isApifyConfigured()) {
+      return NextResponse.json(
+        {
+          error: "API_NOT_CONFIGURED",
+          message: "Apify API 토큰이 설정되지 않았습니다",
+          detail: ".env.local 파일에 APIFY_API_TOKEN을 추가해주세요. Apify 콘솔 → Settings → Integrations에서 API token을 복사할 수 있습니다.",
+        },
+        { status: 503 }
+      );
+    }
+
     // 1. Scrape Instagram via Apify
     const result = await scrapeInstagramPosts(username);
 
     if (!result.success) {
       const errorMessages: Record<string, string> = {
+        NO_API_TOKEN: "Apify API 토큰이 설정되지 않았습니다. .env.local에 APIFY_API_TOKEN을 추가해주세요.",
         PRIVATE_ACCOUNT: "비공개 계정입니다. 공개 계정만 분석 가능해요.",
         ACCOUNT_NOT_FOUND: "계정을 찾을 수 없습니다.",
         INSUFFICIENT_POSTS: "게시물이 5개 미만이에요.",
@@ -27,8 +40,12 @@ export async function POST(req: NextRequest) {
         SCRAPE_FAILED: "Instagram 연결에 실패했습니다. 잠시 후 다시 시도해주세요.",
       };
       return NextResponse.json(
-        { error: errorMessages[result.error || "SCRAPE_FAILED"] },
-        { status: 422 }
+        {
+          error: errorMessages[result.error || "SCRAPE_FAILED"],
+          errorCode: result.error,
+          detail: result.errorDetail,
+        },
+        { status: result.error === "NO_API_TOKEN" ? 503 : 422 }
       );
     }
 

@@ -244,17 +244,26 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
 
       ctx.clearRect(0, 0, w, h);
 
-      // Deep background gradients (warm cosmic purple)
-      const bg1 = ctx.createRadialGradient(w * 0.3, h * 0.3, 0, w * 0.3, h * 0.3, w * 0.6);
-      bg1.addColorStop(0, 'rgba(25,15,45,.45)');
+      // Deep background gradients (rich cosmic nebula)
+      const bg1 = ctx.createRadialGradient(w * 0.25, h * 0.25, 0, w * 0.3, h * 0.3, w * 0.7);
+      bg1.addColorStop(0, 'rgba(30,18,55,.55)');
+      bg1.addColorStop(0.4, 'rgba(20,12,42,.3)');
       bg1.addColorStop(1, 'transparent');
       ctx.fillStyle = bg1;
       ctx.fillRect(0, 0, w, h);
 
-      const bg2 = ctx.createRadialGradient(w * 0.7, h * 0.7, 0, w * 0.7, h * 0.7, w * 0.5);
-      bg2.addColorStop(0, 'rgba(20,10,35,.35)');
+      const bg2 = ctx.createRadialGradient(w * 0.75, h * 0.7, 0, w * 0.7, h * 0.7, w * 0.55);
+      bg2.addColorStop(0, 'rgba(25,12,45,.4)');
+      bg2.addColorStop(0.5, 'rgba(15,8,30,.2)');
       bg2.addColorStop(1, 'transparent');
       ctx.fillStyle = bg2;
+      ctx.fillRect(0, 0, w, h);
+
+      // Center warm glow
+      const bg3 = ctx.createRadialGradient(w * 0.5, h * 0.45, 0, w * 0.5, h * 0.5, w * 0.4);
+      bg3.addColorStop(0, 'rgba(210,160,200,.015)');
+      bg3.addColorStop(1, 'transparent');
+      ctx.fillStyle = bg3;
       ctx.fillRect(0, 0, w, h);
 
       ctx.save();
@@ -262,15 +271,19 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
       ctx.scale(cam.zoom, cam.zoom);
       ctx.translate(cam.x, cam.y);
 
-      // Nebulae
+      // Nebulae (enhanced with multi-stop gradients)
       s.nebulae.forEach(n => {
-        const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
-        g.addColorStop(0, `rgba(${n.c.r},${n.c.g},${n.c.b},${n.a})`);
-        g.addColorStop(0.4, `rgba(${n.c.r},${n.c.g},${n.c.b},${n.a * 0.4})`);
+        const pulse = 0.85 + 0.15 * Math.sin(t * 0.0003 + n.x * 0.01);
+        const rr = n.r * pulse;
+        const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, rr);
+        const na = n.a * 1.5; // boost nebula visibility
+        g.addColorStop(0, `rgba(${n.c.r},${n.c.g},${n.c.b},${na})`);
+        g.addColorStop(0.25, `rgba(${Math.min(255, n.c.r + 30)},${Math.min(255, n.c.g + 20)},${Math.min(255, n.c.b + 40)},${na * 0.5})`);
+        g.addColorStop(0.6, `rgba(${n.c.r},${n.c.g},${n.c.b},${na * 0.15})`);
         g.addColorStop(1, 'transparent');
         ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.arc(n.x, n.y, rr, 0, Math.PI * 2);
         ctx.fill();
       });
 
@@ -305,54 +318,77 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
         ctx.stroke();
       });
 
-      // Stars - 4-layer glow
+      // Stars - premium 5-layer rendering
       const bStar = s.brightestStar;
       s.stars.forEach(star => {
-        const tw = 0.5 + 0.5 * Math.sin(t * star.ts + star.to);
+        const tw1 = Math.sin(t * star.ts + star.to);
+        const tw2 = Math.sin(t * star.ts * 1.7 + star.to * 0.6);
+        const tw = 0.5 + 0.3 * tw1 + 0.2 * tw2;
         const isBr = star === bStar;
-        const r = star.size * (isBr ? 1.15 : 1);
-        const al = isBr ? 0.9 : 0.35 + 0.65 * tw;
+        const r = star.size * (isBr ? 1.3 : 1);
+        const al = isBr ? 0.95 : 0.4 + 0.6 * tw;
         const c = star.post.cat;
+        const c2r = Math.min(255, c.r + 70);
+        const c2g = Math.min(255, c.g + 50);
+        const c2b = Math.min(255, c.b + 90);
 
-        // Wide color halo
-        const g0 = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, r * 5);
-        g0.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${al * 0.06})`);
+        // Layer 1: Wide nebula halo
+        const g0 = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, r * 7);
+        g0.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${al * 0.1})`);
+        g0.addColorStop(0.3, `rgba(${c2r},${c2g},${c2b},${al * 0.04})`);
+        g0.addColorStop(0.6, `rgba(${c.r},${c.g},${c.b},${al * 0.012})`);
         g0.addColorStop(1, 'transparent');
         ctx.fillStyle = g0;
         ctx.beginPath();
-        ctx.arc(star.x, star.y, r * 5, 0, Math.PI * 2);
+        ctx.arc(star.x, star.y, r * 7, 0, Math.PI * 2);
         ctx.fill();
 
-        // Color glow
-        const g1 = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, r * 2.2);
-        g1.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${al * 0.2})`);
+        // Layer 2: Color glow
+        const g1 = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, r * 3);
+        g1.addColorStop(0, `rgba(${c2r},${c2g},${c2b},${al * 0.35})`);
+        g1.addColorStop(0.4, `rgba(${c.r},${c.g},${c.b},${al * 0.15})`);
         g1.addColorStop(1, 'transparent');
         ctx.fillStyle = g1;
         ctx.beginPath();
-        ctx.arc(star.x, star.y, r * 2.2, 0, Math.PI * 2);
+        ctx.arc(star.x, star.y, r * 3, 0, Math.PI * 2);
         ctx.fill();
 
-        // Bright core
-        const g2 = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, r * 0.5);
-        g2.addColorStop(0, `rgba(255,255,255,${al * 0.85})`);
-        g2.addColorStop(0.5, `rgba(${Math.min(255, c.r + 60)},${Math.min(255, c.g + 60)},${Math.min(255, c.b + 60)},${al * 0.3})`);
+        // Layer 3: White-hot core
+        const g2 = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, r * 0.7);
+        g2.addColorStop(0, `rgba(255,255,255,${al * 0.95})`);
+        g2.addColorStop(0.25, `rgba(255,252,255,${al * 0.5})`);
+        g2.addColorStop(0.6, `rgba(${c2r},${c2g},${c2b},${al * 0.15})`);
         g2.addColorStop(1, 'transparent');
         ctx.fillStyle = g2;
         ctx.beginPath();
-        ctx.arc(star.x, star.y, r * 0.5, 0, Math.PI * 2);
+        ctx.arc(star.x, star.y, r * 0.7, 0, Math.PI * 2);
         ctx.fill();
 
-        // Diffraction spikes
-        if (r > 2.5 || isBr) {
-          const fl = r * (isBr ? 4 : 2.5) * tw;
-          ctx.strokeStyle = `rgba(${Math.min(255, c.r + 30)},${Math.min(255, c.g + 30)},${Math.min(255, c.b + 30)},${al * 0.04 * tw})`;
-          ctx.lineWidth = 0.2;
+        // Layer 4: Diffraction cross-flare
+        if (r > 2.2 || isBr) {
+          const fl = r * (isBr ? 5 : 3) * tw;
+          const fa = al * 0.1 * tw;
+          ctx.strokeStyle = `rgba(255,255,255,${fa})`;
+          ctx.lineWidth = isBr ? 0.5 : 0.3;
           for (let i = 0; i < 2; i++) {
             const a2 = star.fa + (Math.PI / 2) * i;
             ctx.beginPath();
             ctx.moveTo(star.x - Math.cos(a2) * fl, star.y - Math.sin(a2) * fl);
             ctx.lineTo(star.x + Math.cos(a2) * fl, star.y + Math.sin(a2) * fl);
             ctx.stroke();
+          }
+          // Diagonal flares for brightest
+          if (isBr) {
+            const dfl = fl * 0.5;
+            ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${fa * 0.4})`;
+            ctx.lineWidth = 0.3;
+            for (let i = 0; i < 2; i++) {
+              const a2 = star.fa + Math.PI / 4 + (Math.PI / 2) * i;
+              ctx.beginPath();
+              ctx.moveTo(star.x - Math.cos(a2) * dfl, star.y - Math.sin(a2) * dfl);
+              ctx.lineTo(star.x + Math.cos(a2) * dfl, star.y + Math.sin(a2) * dfl);
+              ctx.stroke();
+            }
           }
         }
       });
