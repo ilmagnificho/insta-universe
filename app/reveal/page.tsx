@@ -189,7 +189,7 @@ function MiniUniverse({ posts }: { posts: PostData[] }) {
       // Vignette
       const vig = cx!.createRadialGradient(cw / 2, ch / 2, cw * .2, cw / 2, ch / 2, cw * .6);
       vig.addColorStop(0, 'transparent');
-      vig.addColorStop(1, 'rgba(6,8,26,.5)');
+      vig.addColorStop(1, 'rgba(12,8,24,.5)');
       cx!.fillStyle = vig;
       cx!.fillRect(0, 0, cw, ch);
     }
@@ -252,7 +252,7 @@ function TimeDistBar({ posts }: { posts: PostData[] }) {
             background: `linear-gradient(to top, ${d.color}40, ${d.color}90)`,
             transition: `height 1s ${i * 0.15}s cubic-bezier(.16,1,.3,1)`,
           }} />
-          <span style={{ fontSize: '.6rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>{d.label}</span>
+          <span style={{ fontSize: '.6rem', fontWeight: 300, color: 'rgba(248,244,255,.3)' }}>{d.label}</span>
         </div>
       ))}
     </div>
@@ -274,9 +274,9 @@ function PersonalityPills({ keywords, delay = 0 }: { keywords: string[]; delay?:
             fontSize: '.75rem',
             fontWeight: 300,
             padding: '5px 14px',
-            background: 'rgba(155,124,201,.06)',
-            border: '1px solid rgba(155,124,201,.1)',
-            color: 'rgba(240,237,246,.55)',
+            background: 'rgba(210,160,200,.06)',
+            border: '1px solid rgba(210,160,200,.1)',
+            color: 'rgba(248,244,255,.55)',
             opacity: show ? 1 : 0,
             transform: show ? 'scale(1)' : 'scale(0.8)',
             transition: `all .6s ${i * 0.12 + 0.1}s cubic-bezier(.16,1,.3,1)`,
@@ -344,8 +344,8 @@ function RevealContent() {
 
   if (!data || !analysis) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#06081a' }}>
-        <p style={{ fontSize: '0.95rem', color: 'rgba(240,237,246,.45)', fontWeight: 300 }}>로딩 중...</p>
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0c0818' }}>
+        <p style={{ fontSize: '0.95rem', color: 'rgba(248,244,255,.45)', fontWeight: 300 }}>로딩 중...</p>
       </div>
     );
   }
@@ -359,7 +359,7 @@ function RevealContent() {
       ref={scrollRef}
       className="fixed inset-0 z-[120] overflow-y-auto"
       style={{
-        background: 'radial-gradient(ellipse at 50% 20%, #0e1030, #06081a 65%)',
+        background: 'radial-gradient(ellipse at 50% 20%, #1a1038, #0c0818 65%)',
         WebkitOverflowScrolling: 'touch',
       }}
     >
@@ -376,7 +376,7 @@ function RevealContent() {
         {/* Type label */}
         <p className="font-brand italic" style={{
           fontSize: '.78rem', letterSpacing: '.2em', textTransform: 'uppercase',
-          color: 'rgba(155,124,201,.45)',
+          color: 'rgba(210,160,200,.45)',
         }}>
           your universe type
         </p>
@@ -384,7 +384,7 @@ function RevealContent() {
         {/* Type name - the hero */}
         <h1 className="font-brand italic font-normal mt-3 mb-2" style={{
           fontSize: 'clamp(1.8rem, 6vw, 2.4rem)',
-          color: 'rgba(240,237,246,.88)',
+          color: 'rgba(248,244,255,.88)',
         }}>
           {data.userType.type}
         </h1>
@@ -392,15 +392,15 @@ function RevealContent() {
         {/* Rarity badge */}
         <div className="flex items-center gap-1.5 mb-4" style={{
           padding: '4px 12px', borderRadius: 20,
-          background: 'rgba(155,124,201,.08)',
-          border: '1px solid rgba(155,124,201,.12)',
+          background: 'rgba(210,160,200,.08)',
+          border: '1px solid rgba(210,160,200,.12)',
         }}>
           <span className="inline-block rounded-full" style={{
             width: 5, height: 5,
-            background: 'rgba(155,124,201,.6)',
-            boxShadow: '0 0 6px rgba(155,124,201,.4)',
+            background: 'rgba(210,160,200,.6)',
+            boxShadow: '0 0 6px rgba(210,160,200,.4)',
           }} />
-          <span style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(155,124,201,.6)' }}>
+          <span style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(210,160,200,.6)' }}>
             {data.userType.rare} 유형
           </span>
         </div>
@@ -412,7 +412,7 @@ function RevealContent() {
 
         {/* Description */}
         <p className="font-light leading-relaxed mb-7" style={{
-          fontSize: '0.95rem', color: 'rgba(240,237,246,.55)', lineHeight: 1.85,
+          fontSize: '0.95rem', color: 'rgba(248,244,255,.55)', lineHeight: 1.85,
         }}>
           {data.userType.description}
         </p>
@@ -429,13 +429,13 @@ function RevealContent() {
               가장 큰 별자리
             </p>
           </div>
-          <p className="font-brand italic font-normal mb-1" style={{ fontSize: '1.3rem', color: 'rgba(240,237,246,.8)' }}>
+          <p className="font-brand italic font-normal mb-1" style={{ fontSize: '1.3rem', color: 'rgba(248,244,255,.8)' }}>
             {data.topCategory}
           </p>
-          <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.45)', lineHeight: 1.7 }}>
+          <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.45)', lineHeight: 1.7 }}>
             우주의 <span style={{ color: topCatColor, fontWeight: 400 }}>{analysis.topPct}%</span>를 차지하고 있어요
             {analysis.secondCat && (
-              <>, 뒤이어 <span style={{ color: 'rgba(240,237,246,.6)' }}>{analysis.secondCat}</span>이 {analysis.secondPct}%</>
+              <>, 뒤이어 <span style={{ color: 'rgba(248,244,255,.6)' }}>{analysis.secondCat}</span>이 {analysis.secondPct}%</>
             )}
           </p>
         </div>
@@ -443,21 +443,21 @@ function RevealContent() {
         {/* ===== Free Insight Card ===== */}
         <div className="w-full rounded-2xl text-left mb-5" style={{
           padding: '22px 20px',
-          background: 'linear-gradient(165deg, rgba(155,124,201,.06), rgba(100,140,220,.03))',
-          border: '1px solid rgba(155,124,201,.1)',
+          background: 'linear-gradient(165deg, rgba(210,160,200,.06), rgba(100,140,220,.03))',
+          border: '1px solid rgba(210,160,200,.1)',
         }}>
           <p className="font-brand italic mb-3" style={{
-            fontSize: '.82rem', color: 'rgba(155,124,201,.55)', letterSpacing: '.06em',
+            fontSize: '.82rem', color: 'rgba(210,160,200,.55)', letterSpacing: '.06em',
           }}>
             AI가 발견한 첫 번째 비밀
           </p>
           <p className="font-light leading-relaxed" style={{
-            fontSize: '0.95rem', color: 'rgba(240,237,246,.7)', lineHeight: 1.85,
+            fontSize: '0.95rem', color: 'rgba(248,244,255,.7)', lineHeight: 1.85,
           }}
             dangerouslySetInnerHTML={{ __html: freeInsight.replace(/\n/g, '<br/>') }}
           />
           <p className="mt-4 pt-3" style={{
-            fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.3)',
+            fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.3)',
             borderTop: '1px solid rgba(255,255,255,.04)',
           }}>
             이 외에도 시간대, 카테고리 교차 분석이 완료되었습니다
@@ -471,16 +471,16 @@ function RevealContent() {
           border: '1px solid rgba(255,255,255,.05)',
         }}>
           <p className="font-brand italic mb-3" style={{
-            fontSize: '.82rem', color: 'rgba(155,124,201,.45)', letterSpacing: '.06em',
+            fontSize: '.82rem', color: 'rgba(210,160,200,.45)', letterSpacing: '.06em',
           }}>
             활동 시간대 분포
           </p>
           <TimeDistBar posts={data.posts} />
           <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,.04)' }}>
-            <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(240,237,246,.5)', lineHeight: 1.7 }}>
+            <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.5)', lineHeight: 1.7 }}>
               게시물의 <span style={{ color: '#8b5cf6', fontWeight: 400 }}>{analysis.evPct}%</span>가 저녁 이후에 집중
             </p>
-            <p className="mt-1 flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>
+            <p className="mt-1 flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.3)' }}>
               <span style={{ opacity: 0.5 }}>🔒</span>
               이 패턴이 의미하는 것은...
             </p>
@@ -490,20 +490,20 @@ function RevealContent() {
         {/* ===== Blurred Universe Preview ===== */}
         <div className="w-full rounded-2xl overflow-hidden relative mb-5" style={{
           aspectRatio: '1',
-          background: '#06081a',
-          border: '1px solid rgba(155,124,201,.06)',
+          background: '#0c0818',
+          border: '1px solid rgba(210,160,200,.06)',
         }}>
           <MiniUniverse posts={data.posts} />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2" style={{
             backdropFilter: 'blur(3px)',
-            background: 'radial-gradient(ellipse at center, rgba(6,8,26,.05), rgba(6,8,26,.3) 80%)',
+            background: 'radial-gradient(ellipse at center, rgba(12,8,24,.05), rgba(12,8,24,.3) 80%)',
           }}>
             <p className="font-brand italic font-normal" style={{
-              fontSize: '1.15rem', color: 'rgba(240,237,246,.75)',
+              fontSize: '1.15rem', color: 'rgba(248,244,255,.75)',
             }}>
               당신의 우주가 완성되었어요
             </p>
-            <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(240,237,246,.4)' }}>
+            <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.4)' }}>
               {starCount}개의 별이 당신을 기다리고 있어요
             </p>
           </div>
@@ -522,10 +522,10 @@ function RevealContent() {
               background: 'rgba(255,255,255,.015)',
               border: '1px solid rgba(255,255,255,.04)',
             }}>
-              <div className="font-brand" style={{ fontSize: '1rem', color: 'rgba(240,237,246,.65)' }}>
+              <div className="font-brand" style={{ fontSize: '1rem', color: 'rgba(248,244,255,.65)' }}>
                 {typeof s.n === 'number' ? <AnimatedNumber target={s.n} /> : s.n}
               </div>
-              <div style={{ fontSize: '.62rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>
+              <div style={{ fontSize: '.62rem', fontWeight: 300, color: 'rgba(248,244,255,.3)' }}>
                 {s.l}
               </div>
             </div>
@@ -539,7 +539,7 @@ function RevealContent() {
           border: '1px solid rgba(255,255,255,.05)',
         }}>
           <div className="flex items-center justify-between mb-2">
-            <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(240,237,246,.45)' }}>
+            <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(248,244,255,.45)' }}>
               가장 빛났던 순간
             </p>
             <span style={{ fontSize: '.82rem', color: 'rgba(235,130,175,.5)' }}>
@@ -547,11 +547,11 @@ function RevealContent() {
             </span>
           </div>
           <p className="font-light mb-2" style={{
-            fontSize: '.9rem', color: 'rgba(240,237,246,.6)', lineHeight: 1.7,
+            fontSize: '.9rem', color: 'rgba(248,244,255,.6)', lineHeight: 1.7,
           }}>
             &ldquo;{analysis.topPost.caption.substring(0, 30)}{analysis.topPost.caption.length > 30 ? '...' : ''}&rdquo;
           </p>
-          <p className="flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>
+          <p className="flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.3)' }}>
             <span style={{ opacity: 0.5 }}>🔒</span>
             이 게시물이 빛난 이유 &middot; AI 분석
           </p>
@@ -560,20 +560,20 @@ function RevealContent() {
         {/* ===== Emotional Pattern Teaser ===== */}
         <div className="w-full rounded-2xl text-left mb-5" style={{
           padding: '18px 20px',
-          background: 'linear-gradient(165deg, rgba(100,180,240,.03), rgba(155,124,201,.04))',
-          border: '1px solid rgba(100,180,240,.08)',
+          background: 'linear-gradient(165deg, rgba(130,200,255,.03), rgba(210,160,200,.04))',
+          border: '1px solid rgba(130,200,255,.08)',
         }}>
           <p className="font-brand italic mb-2" style={{
-            fontSize: '.82rem', color: 'rgba(100,180,240,.5)', letterSpacing: '.06em',
+            fontSize: '.82rem', color: 'rgba(130,200,255,.5)', letterSpacing: '.06em',
           }}>
             감정 패턴 프리뷰
           </p>
           <p className="font-light" style={{
-            fontSize: '.88rem', color: 'rgba(240,237,246,.5)', lineHeight: 1.7,
+            fontSize: '.88rem', color: 'rgba(248,244,255,.5)', lineHeight: 1.7,
           }}>
             {analysis.emotionTeaser}
           </p>
-          <p className="mt-2 flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.25)' }}>
+          <p className="mt-2 flex items-center gap-1.5" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.25)' }}>
             <span style={{ opacity: 0.5 }}>🔒</span>
             전체 감정 패턴 분석 보기
           </p>
@@ -581,7 +581,7 @@ function RevealContent() {
 
         {/* ===== Locked insights - creates FOMO ===== */}
         <div className="w-full mb-5">
-          <p className="text-left mb-3" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(240,237,246,.4)' }}>
+          <p className="text-left mb-3" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(248,244,255,.4)' }}>
             잠금 해제 시 공개될 콘텐츠
           </p>
           <div className="flex flex-col gap-2">
@@ -592,7 +592,7 @@ function RevealContent() {
                 border: '1px solid rgba(255,255,255,.05)',
               }}>
                 <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
-                <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.5)' }}>
+                <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.5)' }}>
                   {lock}
                 </span>
               </div>
@@ -603,7 +603,7 @@ function RevealContent() {
               border: '1px solid rgba(255,255,255,.05)',
             }}>
               <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
-              <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.5)' }}>
+              <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.5)' }}>
                 {starCount}개 별 하나하나의 AI 인사이트
               </span>
             </div>
@@ -613,17 +613,17 @@ function RevealContent() {
               border: '1px solid rgba(255,255,255,.05)',
             }}>
               <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
-              <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.5)' }}>
+              <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.5)' }}>
                 인터랙티브 우주 탐색 + 카테고리별 딥 분석
               </span>
             </div>
             <div className="flex items-center gap-3 text-left rounded-xl" style={{
               padding: '14px 16px',
-              background: 'rgba(155,124,201,.03)',
-              border: '1px solid rgba(155,124,201,.08)',
+              background: 'rgba(210,160,200,.03)',
+              border: '1px solid rgba(210,160,200,.08)',
             }}>
               <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
-              <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(155,124,201,.5)' }}>
+              <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(210,160,200,.5)' }}>
                 우주 성격 카드 + 공유 기능
               </span>
             </div>
@@ -635,8 +635,8 @@ function RevealContent() {
           opacity: showDetail ? 1 : 0,
           transition: 'opacity .8s',
         }}>
-          <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.25)' }}>
-            지금까지 <span style={{ color: 'rgba(155,124,201,.5)' }}>2,847명</span>이 자신의 우주를 탐험했어요
+          <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.25)' }}>
+            지금까지 <span style={{ color: 'rgba(210,160,200,.5)' }}>2,847명</span>이 자신의 우주를 탐험했어요
           </p>
         </div>
 
@@ -646,10 +646,10 @@ function RevealContent() {
           className="w-full rounded-xl cursor-pointer transition-all active:scale-[.98]"
           style={{
             padding: '18px',
-            background: 'linear-gradient(135deg, rgba(155,124,201,.35), rgba(120,140,220,.3))',
-            border: '1px solid rgba(155,124,201,.3)',
-            boxShadow: '0 4px 30px rgba(155,124,201,.15), 0 0 60px rgba(155,124,201,.06)',
-            color: 'rgba(240,237,246,.95)',
+            background: 'linear-gradient(135deg, rgba(210,160,200,.35), rgba(120,140,220,.3))',
+            border: '1px solid rgba(210,160,200,.3)',
+            boxShadow: '0 4px 30px rgba(210,160,200,.15), 0 0 60px rgba(210,160,200,.06)',
+            color: 'rgba(248,244,255,.95)',
             fontSize: '1.08rem',
             fontWeight: 400,
             letterSpacing: '.02em',
@@ -659,11 +659,11 @@ function RevealContent() {
           우주 잠금 해제 — ₩4,900
         </button>
 
-        <p className="mt-2" style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(240,237,246,.2)' }}>
+        <p className="mt-2" style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(248,244,255,.2)' }}>
           카카오페이 · 카드 결제
         </p>
 
-        <p className="mt-1.5" style={{ fontSize: '.68rem', fontWeight: 200, color: 'rgba(240,237,246,.15)' }}>
+        <p className="mt-1.5" style={{ fontSize: '.68rem', fontWeight: 200, color: 'rgba(248,244,255,.15)' }}>
           결제 시뮬레이션 (바로 넘어갑니다)
         </p>
       </div>
@@ -675,8 +675,8 @@ export default function RevealPage() {
   return (
     <Suspense
       fallback={
-        <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#06081a' }}>
-          <p style={{ fontSize: '0.95rem', color: 'rgba(240,237,246,.45)', fontWeight: 300 }}>로딩 중...</p>
+        <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0c0818' }}>
+          <p style={{ fontSize: '0.95rem', color: 'rgba(248,244,255,.45)', fontWeight: 300 }}>로딩 중...</p>
         </div>
       }
     >

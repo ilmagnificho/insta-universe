@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import {
   loadMockData, STAR_INSIGHTS, CLUSTER_INSIGHTS, CROSS_INSIGHTS,
   DEEP_PERSONALITY, ACHIEVEMENT_BADGES, MONTHLY_INSIGHTS, PERSONALITY_KEYWORDS,
+  getUniqueStarInsight, STABILITY_PATTERNS, RELATIONSHIP_TRAITS, HEALING_CONDITIONS,
 } from '@/lib/mock-data';
 import type { MockResult, UniverseStar, ClusterCenter } from '@/lib/types';
 import { CATEGORIES } from '@/lib/types';
@@ -59,11 +60,11 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
 
     let animId: number;
     function draw() {
-      cx!.fillStyle = 'rgba(6,8,26,0.03)';
+      cx!.fillStyle = 'rgba(12,8,24,0.03)';
       cx!.fillRect(0, 0, w, h);
 
       const cg = cx!.createRadialGradient(mx, my, 0, mx, my, 80);
-      cg.addColorStop(0, 'rgba(155,124,201,.06)');
+      cg.addColorStop(0, 'rgba(210,160,200,.06)');
       cg.addColorStop(1, 'transparent');
       cx!.fillStyle = cg;
       cx!.beginPath();
@@ -111,12 +112,12 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[130] flex items-center justify-center"
-      style={{ background: 'radial-gradient(ellipse at center, #0c0e28, #06081a)' }}>
+      style={{ background: 'radial-gradient(ellipse at center, #14102a, #0c0818)' }}>
       <canvas ref={canvasRef} className="fixed inset-0" />
       <p className="relative z-10 font-brand italic font-light text-center transition-opacity duration-500"
         style={{
           fontSize: '1.15rem',
-          color: 'rgba(240,237,246,.7)',
+          color: 'rgba(248,244,255,.7)',
           opacity: textVisible ? 1 : 0,
         }}>
         {text}
@@ -209,7 +210,7 @@ function UniverseDNA({
 
   return (
     <div className="fixed inset-0 z-[180] overflow-y-auto" style={{
-      background: 'rgba(6,8,26,.97)',
+      background: 'rgba(12,8,24,.97)',
       WebkitOverflowScrolling: 'touch',
     }}>
       <div className="mx-auto" style={{ maxWidth: 380, padding: '20px 22px 80px' }}>
@@ -218,7 +219,7 @@ function UniverseDNA({
           onClick={onClose}
           className="cursor-pointer mb-4"
           style={{
-            fontSize: '.85rem', fontWeight: 300, color: 'rgba(240,237,246,.35)',
+            fontSize: '.85rem', fontWeight: 300, color: 'rgba(248,244,255,.35)',
             background: 'none', border: 'none', padding: '8px 0',
             WebkitTapHighlightColor: 'transparent',
           }}
@@ -229,16 +230,16 @@ function UniverseDNA({
         {/* Header */}
         <p className="font-brand italic" style={{
           fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase',
-          color: 'rgba(155,124,201,.4)', marginBottom: 8,
+          color: 'rgba(210,160,200,.4)', marginBottom: 8,
         }}>
           universe dna
         </p>
         <h2 className="font-brand italic font-normal mb-1" style={{
-          fontSize: '1.6rem', color: 'rgba(240,237,246,.85)',
+          fontSize: '1.6rem', color: 'rgba(248,244,255,.85)',
         }}>
           {data.userType.type}
         </h2>
-        <p className="mb-5" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(155,124,201,.45)' }}>
+        <p className="mb-5" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(210,160,200,.45)' }}>
           {data.userType.rare} 유형
         </p>
 
@@ -247,8 +248,8 @@ function UniverseDNA({
           {personality.keywords.map((kw, i) => (
             <span key={i} className="rounded-full" style={{
               fontSize: '.75rem', fontWeight: 300, padding: '5px 14px',
-              background: 'rgba(155,124,201,.06)', border: '1px solid rgba(155,124,201,.1)',
-              color: 'rgba(240,237,246,.55)',
+              background: 'rgba(210,160,200,.06)', border: '1px solid rgba(210,160,200,.1)',
+              color: 'rgba(248,244,255,.55)',
             }}>
               {kw}
             </span>
@@ -261,7 +262,7 @@ function UniverseDNA({
           border: '1px solid rgba(255,255,255,.05)',
         }}>
           <p className="font-brand italic mb-4" style={{
-            fontSize: '.82rem', color: 'rgba(155,124,201,.5)', letterSpacing: '.06em',
+            fontSize: '.82rem', color: 'rgba(210,160,200,.5)', letterSpacing: '.06em',
           }}>
             우주 구성
           </p>
@@ -274,11 +275,11 @@ function UniverseDNA({
                       width: 7, height: 7, background: g.cat.hex,
                       boxShadow: `0 0 6px ${g.cat.hex}60`,
                     }} />
-                    <span style={{ fontSize: '.85rem', fontWeight: 300, color: 'rgba(240,237,246,.65)' }}>
+                    <span style={{ fontSize: '.85rem', fontWeight: 300, color: 'rgba(248,244,255,.65)' }}>
                       {g.name}
                     </span>
                   </div>
-                  <span style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(240,237,246,.4)' }}>
+                  <span style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(248,244,255,.4)' }}>
                     {g.pct}% · {g.count}개
                   </span>
                 </div>
@@ -291,7 +292,7 @@ function UniverseDNA({
                 </div>
                 {i === 0 && (
                   <p className="mt-2 font-light" style={{
-                    fontSize: '.8rem', color: 'rgba(240,237,246,.4)', lineHeight: 1.6,
+                    fontSize: '.8rem', color: 'rgba(248,244,255,.4)', lineHeight: 1.6,
                   }}>
                     {CLUSTER_INSIGHTS[g.name] || ''}
                   </p>
@@ -307,7 +308,7 @@ function UniverseDNA({
           border: '1px solid rgba(255,255,255,.05)',
         }}>
           <p className="font-brand italic mb-4" style={{
-            fontSize: '.82rem', color: 'rgba(155,124,201,.5)', letterSpacing: '.06em',
+            fontSize: '.82rem', color: 'rgba(210,160,200,.5)', letterSpacing: '.06em',
           }}>
             시간 패턴 분석
           </p>
@@ -320,11 +321,11 @@ function UniverseDNA({
               }}>
                 <div style={{ fontSize: '1.1rem', marginBottom: 2 }}>{t.emoji}</div>
                 <div className="font-brand" style={{ fontSize: '1rem', color: t.color }}>{t.pct}%</div>
-                <div style={{ fontSize: '.62rem', fontWeight: 300, color: 'rgba(240,237,246,.35)' }}>{t.label}</div>
+                <div style={{ fontSize: '.62rem', fontWeight: 300, color: 'rgba(248,244,255,.35)' }}>{t.label}</div>
               </div>
             ))}
           </div>
-          <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(240,237,246,.5)', lineHeight: 1.7 }}>
+          <p className="font-light" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.5)', lineHeight: 1.7 }}>
             {monthlyInsight}
           </p>
         </div>
@@ -333,11 +334,11 @@ function UniverseDNA({
         {crossInsights.length > 0 && (
           <div className="rounded-2xl mb-5" style={{
             padding: '20px',
-            background: 'linear-gradient(165deg, rgba(100,180,240,.03), rgba(155,124,201,.04))',
-            border: '1px solid rgba(100,180,240,.08)',
+            background: 'linear-gradient(165deg, rgba(130,200,255,.03), rgba(210,160,200,.04))',
+            border: '1px solid rgba(130,200,255,.08)',
           }}>
             <p className="font-brand italic mb-4" style={{
-              fontSize: '.82rem', color: 'rgba(100,180,240,.5)', letterSpacing: '.06em',
+              fontSize: '.82rem', color: 'rgba(130,200,255,.5)', letterSpacing: '.06em',
             }}>
               교차 패턴 발견
             </p>
@@ -359,7 +360,7 @@ function UniverseDNA({
                       );
                     })}
                   </div>
-                  <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.55)', lineHeight: 1.7 }}>
+                  <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.55)', lineHeight: 1.7 }}>
                     {ci.text}
                   </p>
                 </div>
@@ -371,16 +372,16 @@ function UniverseDNA({
         {/* ===== Deep Personality ===== */}
         <div className="rounded-2xl mb-5" style={{
           padding: '20px',
-          background: 'linear-gradient(165deg, rgba(155,124,201,.06), rgba(100,140,220,.03))',
-          border: '1px solid rgba(155,124,201,.1)',
+          background: 'linear-gradient(165deg, rgba(210,160,200,.06), rgba(130,200,255,.03))',
+          border: '1px solid rgba(210,160,200,.1)',
         }}>
           <p className="font-brand italic mb-4" style={{
-            fontSize: '.82rem', color: 'rgba(155,124,201,.55)', letterSpacing: '.06em',
+            fontSize: '.82rem', color: 'rgba(210,160,200,.6)', letterSpacing: '.06em',
           }}>
             AI 성격 심층 분석
           </p>
           <p className="font-light leading-relaxed mb-4" style={{
-            fontSize: '.95rem', color: 'rgba(240,237,246,.7)', lineHeight: 1.9,
+            fontSize: '.95rem', color: 'rgba(248,244,255,.72)', lineHeight: 1.9,
           }}>
             {data.userType.insight}
           </p>
@@ -388,10 +389,10 @@ function UniverseDNA({
             {personality.insights.map((insight, i) => (
               <div key={i} className="rounded-xl" style={{
                 padding: '14px 16px',
-                background: 'rgba(255,255,255,.015)',
-                borderLeft: `2px solid rgba(155,124,201,${0.2 - i * 0.05})`,
+                background: 'rgba(210,160,200,.03)',
+                borderLeft: `2px solid rgba(210,160,200,${0.2 - i * 0.05})`,
               }}>
-                <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.6)', lineHeight: 1.7 }}>
+                <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.62)', lineHeight: 1.7 }}>
                   {insight}
                 </p>
               </div>
@@ -399,14 +400,127 @@ function UniverseDNA({
           </div>
         </div>
 
+        {/* ===== Stability Pattern (안정감의 패턴) ===== */}
+        {(() => {
+          const dates = data.posts.map(p => new Date(p.date).getTime()).sort();
+          const gaps = dates.slice(1).map((d, i) => d - dates[i]);
+          const avgGap = gaps.length > 0 ? gaps.reduce((a, b) => a + b, 0) / gaps.length / 86400000 : 3;
+          const recentHalf = data.posts.slice(0, Math.floor(data.posts.length / 2)).length;
+          const olderHalf = data.posts.slice(Math.floor(data.posts.length / 2)).length;
+          const patternKey = avgGap < 6 ? 'regular' : recentHalf > olderHalf * 1.3 ? 'increasing' : recentHalf < olderHalf * 0.7 ? 'declining' : 'burst';
+          const pattern = STABILITY_PATTERNS[patternKey];
+          return (
+            <div className="rounded-2xl mb-5" style={{
+              padding: '20px',
+              background: 'linear-gradient(165deg, rgba(120,232,196,.04), rgba(210,160,200,.04))',
+              border: '1px solid rgba(120,232,196,.1)',
+            }}>
+              <p className="font-brand italic mb-3" style={{
+                fontSize: '.82rem', color: 'rgba(120,232,196,.55)', letterSpacing: '.06em',
+              }}>
+                안정감의 패턴
+              </p>
+              <p className="font-brand italic font-normal mb-2" style={{
+                fontSize: '1.15rem', color: 'rgba(248,244,255,.78)',
+              }}>
+                {pattern.title}
+              </p>
+              <p className="font-light mb-3" style={{
+                fontSize: '.88rem', color: 'rgba(248,244,255,.55)', lineHeight: 1.75,
+              }}>
+                {pattern.description}
+              </p>
+              <div className="rounded-xl" style={{
+                padding: '12px 16px',
+                background: 'rgba(120,232,196,.04)',
+                borderLeft: '2px solid rgba(120,232,196,.15)',
+              }}>
+                <p className="font-light" style={{ fontSize: '.82rem', color: 'rgba(120,232,196,.5)', lineHeight: 1.6 }}>
+                  {pattern.advice}
+                </p>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ===== Relationship Traits (관계에서 드러나는 진짜 성향) ===== */}
+        <div className="rounded-2xl mb-5" style={{
+          padding: '20px',
+          background: 'linear-gradient(165deg, rgba(255,142,184,.04), rgba(210,160,200,.04))',
+          border: '1px solid rgba(255,142,184,.1)',
+        }}>
+          <p className="font-brand italic mb-4" style={{
+            fontSize: '.82rem', color: 'rgba(255,142,184,.55)', letterSpacing: '.06em',
+          }}>
+            관계에서 드러나는 진짜 성향
+          </p>
+          <div className="flex flex-col gap-3">
+            {(RELATIONSHIP_TRAITS[data.topCategory] || RELATIONSHIP_TRAITS['일상']).map((trait, i) => (
+              <div key={i} className="rounded-xl" style={{
+                padding: '14px 16px',
+                background: 'rgba(255,142,184,.03)',
+                borderLeft: `2px solid rgba(255,142,184,${0.18 - i * 0.04})`,
+              }}>
+                <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.6)', lineHeight: 1.7 }}>
+                  {trait}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ===== Healing Energy Conditions (치유 에너지의 조건) ===== */}
+        {(() => {
+          const healing = HEALING_CONDITIONS[data.topCategory] || HEALING_CONDITIONS['일상'];
+          return (
+            <div className="rounded-2xl mb-5" style={{
+              padding: '20px',
+              background: 'linear-gradient(165deg, rgba(130,200,255,.04), rgba(168,128,240,.04))',
+              border: '1px solid rgba(130,200,255,.1)',
+            }}>
+              <p className="font-brand italic mb-3" style={{
+                fontSize: '.82rem', color: 'rgba(130,200,255,.55)', letterSpacing: '.06em',
+              }}>
+                치유 에너지의 조건
+              </p>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="rounded-full" style={{
+                  padding: '4px 12px', fontSize: '.75rem', fontWeight: 300,
+                  background: 'rgba(130,200,255,.08)', color: 'rgba(130,200,255,.6)',
+                  border: '1px solid rgba(130,200,255,.12)',
+                }}>
+                  {healing.energy}
+                </span>
+              </div>
+              <p className="font-light mb-3" style={{
+                fontSize: '.88rem', color: 'rgba(248,244,255,.6)', lineHeight: 1.75,
+              }}>
+                {healing.condition}
+              </p>
+              <div className="rounded-xl" style={{
+                padding: '12px 16px',
+                background: 'rgba(130,200,255,.04)',
+                borderLeft: '2px solid rgba(130,200,255,.15)',
+              }}>
+                <p className="font-brand italic mb-1" style={{ fontSize: '.72rem', color: 'rgba(130,200,255,.45)' }}>
+                  추천
+                </p>
+                <p className="font-light" style={{ fontSize: '.82rem', color: 'rgba(248,244,255,.55)', lineHeight: 1.6 }}>
+                  {healing.recommendation}
+                </p>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* ===== Achievement Badges ===== */}
         {badges.length > 0 && (
           <div className="rounded-2xl mb-5" style={{
-            padding: '20px', background: 'rgba(255,255,255,.012)',
-            border: '1px solid rgba(255,255,255,.05)',
+            padding: '20px', background: 'rgba(210,160,200,.03)',
+            border: '1px solid rgba(210,160,200,.06)',
           }}>
             <p className="font-brand italic mb-4" style={{
-              fontSize: '.82rem', color: 'rgba(155,124,201,.5)', letterSpacing: '.06em',
+              fontSize: '.82rem', color: 'rgba(210,160,200,.55)', letterSpacing: '.06em',
             }}>
               획득한 우주 뱃지
             </p>
@@ -414,13 +528,13 @@ function UniverseDNA({
               {badges.map((b, i) => (
                 <div key={i} className="flex items-center gap-3 rounded-xl" style={{
                   padding: '14px 16px',
-                  background: 'rgba(155,124,201,.03)',
-                  border: '1px solid rgba(155,124,201,.08)',
+                  background: 'rgba(210,160,200,.03)',
+                  border: '1px solid rgba(210,160,200,.08)',
                 }}>
                   <span style={{ fontSize: '1.3rem' }}>{b.icon}</span>
                   <div>
-                    <p style={{ fontSize: '.88rem', fontWeight: 400, color: 'rgba(240,237,246,.7)' }}>{b.title}</p>
-                    <p style={{ fontSize: '.75rem', fontWeight: 300, color: 'rgba(240,237,246,.35)' }}>{b.desc}</p>
+                    <p style={{ fontSize: '.88rem', fontWeight: 400, color: 'rgba(248,244,255,.72)' }}>{b.title}</p>
+                    <p style={{ fontSize: '.75rem', fontWeight: 300, color: 'rgba(248,244,255,.4)' }}>{b.desc}</p>
                   </div>
                 </div>
               ))}
@@ -431,19 +545,19 @@ function UniverseDNA({
         {/* ===== Summary Message ===== */}
         <div className="rounded-2xl text-center" style={{
           padding: '28px 20px',
-          background: 'linear-gradient(170deg, rgba(155,124,201,.04), rgba(100,180,240,.03))',
-          border: '1px solid rgba(155,124,201,.08)',
+          background: 'linear-gradient(170deg, rgba(210,160,200,.05), rgba(130,200,255,.04))',
+          border: '1px solid rgba(210,160,200,.1)',
         }}>
           <p className="font-brand italic font-normal mb-3" style={{
-            fontSize: '1.15rem', color: 'rgba(240,237,246,.7)',
+            fontSize: '1.15rem', color: 'rgba(248,244,255,.75)',
           }}>
             당신의 우주는 계속 확장 중이에요
           </p>
           <p className="font-light" style={{
-            fontSize: '.88rem', color: 'rgba(240,237,246,.45)', lineHeight: 1.7,
+            fontSize: '.88rem', color: 'rgba(248,244,255,.5)', lineHeight: 1.7,
           }}>
             {data.posts.length}개의 별이 말하는 건 결국 하나예요.<br />
-            <span style={{ color: 'rgba(155,124,201,.6)' }}>당신은 꽤 괜찮은 사람이라는 것.</span>
+            <span style={{ color: 'rgba(210,160,200,.65)' }}>당신은 꽤 괜찮은 사람이라는 것.</span>
           </p>
         </div>
       </div>
@@ -482,17 +596,17 @@ function ExploreProgress({
         border: '1px solid rgba(255,255,255,.06)',
       }}>
         <div className="flex items-center justify-between mb-2">
-          <span style={{ fontSize: '.75rem', fontWeight: 300, color: 'rgba(240,237,246,.4)' }}>
+          <span style={{ fontSize: '.75rem', fontWeight: 300, color: 'rgba(248,244,255,.4)' }}>
             탐험한 별 {tapped}/{total}
           </span>
-          <span className="font-brand" style={{ fontSize: '.82rem', color: 'rgba(155,124,201,.5)' }}>
+          <span className="font-brand" style={{ fontSize: '.82rem', color: 'rgba(210,160,200,.5)' }}>
             {pct}%
           </span>
         </div>
         <div className="w-full rounded-full mb-2" style={{ height: 2.5, background: 'rgba(255,255,255,.06)' }}>
           <div className="rounded-full" style={{
             width: `${pct}%`, height: '100%',
-            background: 'linear-gradient(to right, rgba(155,124,201,.4), rgba(155,124,201,.7))',
+            background: 'linear-gradient(to right, rgba(210,160,200,.4), rgba(210,160,200,.7))',
             transition: 'width .6s ease-out',
           }} />
         </div>
@@ -503,9 +617,9 @@ function ExploreProgress({
             style={{
               padding: '9px',
               fontSize: '.82rem', fontWeight: 300,
-              color: 'rgba(155,124,201,.6)',
-              background: 'rgba(155,124,201,.06)',
-              border: '1px solid rgba(155,124,201,.1)',
+              color: 'rgba(210,160,200,.6)',
+              background: 'rgba(210,160,200,.06)',
+              border: '1px solid rgba(210,160,200,.1)',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
@@ -551,7 +665,7 @@ function UniverseContent() {
     setToastsActive(true);
   }, []);
 
-  // Star tap handler - enriched with deeper insights
+  // Star tap handler - enriched with unique per-star insights
   const handleStarTap = useCallback((star: UniverseStar) => {
     // Track tapped stars
     setTappedStars(prev => {
@@ -560,13 +674,13 @@ function UniverseContent() {
       return next;
     });
 
-    const catInsights = STAR_INSIGHTS[star.post.cat.name] || [''];
-    const insight = catInsights[Math.floor(Math.random() * catInsights.length)];
+    // Get unique insight for this specific star
+    const insight = getUniqueStarInsight(star.post.id, star.post.cat.name, star.post.hour, star.post.likes);
 
     // Deep insight for popular posts
     const deepInsights = DEEP_PERSONALITY[star.post.cat.name] || [];
     const bonusInsight = star.post.likes > 400 && deepInsights.length > 0
-      ? deepInsights[Math.floor(Math.random() * deepInsights.length)]
+      ? deepInsights[star.post.id % deepInsights.length]
       : null;
 
     setBsContent(
@@ -663,14 +777,14 @@ function UniverseContent() {
 
   if (!data) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#06081a' }}>
-        <p style={{ fontSize: '.74rem', color: 'rgba(240,237,246,.2)', fontWeight: 200 }}>로딩 중...</p>
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0c0818' }}>
+        <p style={{ fontSize: '.74rem', color: 'rgba(248,244,255,.2)', fontWeight: 200 }}>로딩 중...</p>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0" style={{ background: '#06081a' }}>
+    <div className="fixed inset-0" style={{ background: '#0c0818' }}>
       {/* Unlock animation phase */}
       {phase === 'unlock' && <UnlockAnimation onComplete={handleUnlockComplete} />}
 
@@ -688,13 +802,13 @@ function UniverseContent() {
       {/* Onboarding overlay */}
       <div className={`onboarding ${showOnboarding ? 'show' : ''}`} onClick={handleDismissOnboarding}>
         <div className="onboarding-card">
-          <p className="font-light leading-relaxed mb-2" style={{ fontSize: '.95rem', color: 'rgba(240,237,246,.75)' }}>
+          <p className="font-light leading-relaxed mb-2" style={{ fontSize: '.95rem', color: 'rgba(248,244,255,.75)' }}>
             별 하나가 게시물 하나예요
           </p>
-          <p className="font-light leading-relaxed mb-3" style={{ fontSize: '.85rem', color: 'rgba(240,237,246,.5)' }}>
+          <p className="font-light leading-relaxed mb-3" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.5)' }}>
             터치해서 AI가 읽은 순간을 확인해보세요
           </p>
-          <p style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>
+          <p style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(248,244,255,.3)' }}>
             아무 곳이나 터치하면 넘어가요
           </p>
         </div>
@@ -747,8 +861,8 @@ export default function UniversePage() {
   return (
     <Suspense
       fallback={
-        <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#06081a' }}>
-          <p style={{ fontSize: '.74rem', color: 'rgba(240,237,246,.2)', fontWeight: 200 }}>로딩 중...</p>
+        <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0c0818' }}>
+          <p style={{ fontSize: '.74rem', color: 'rgba(248,244,255,.2)', fontWeight: 200 }}>로딩 중...</p>
         </div>
       }
     >

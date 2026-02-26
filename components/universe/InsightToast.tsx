@@ -76,17 +76,17 @@ export default function InsightToast({ items, active, onShareClick }: Props) {
     <div className="toast-stack">
       {visibleToasts.map(toast => (
         <div key={toast.id} className={`toast-item ${toast.show ? 'show' : ''}`}>
-          <p className="font-brand italic mb-1" style={{ fontSize: '.75rem', color: 'rgba(155,124,201,.5)', letterSpacing: '.04em' }}>
+          <p className="font-brand italic mb-1" style={{ fontSize: '.75rem', color: 'rgba(210,160,200,.5)', letterSpacing: '.04em' }}>
             {toast.label}
           </p>
-          <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.6)', lineHeight: 1.6 }}>
+          <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.6)', lineHeight: 1.6 }}>
             {toast.text}
           </p>
         </div>
       ))}
       {showShare && (
         <div className="toast-item show cursor-pointer" onClick={onShareClick}>
-          <p className="text-center" style={{ fontSize: '.88rem', fontWeight: 300, color: 'rgba(155,124,201,.55)' }}>
+          <p className="text-center" style={{ fontSize: '.88rem', fontWeight: 300, color: 'rgba(210,160,200,.55)' }}>
             내 우주 카드 저장/공유
           </p>
         </div>

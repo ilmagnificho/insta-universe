@@ -244,15 +244,15 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
 
       ctx.clearRect(0, 0, w, h);
 
-      // Deep background gradients
+      // Deep background gradients (warm cosmic purple)
       const bg1 = ctx.createRadialGradient(w * 0.3, h * 0.3, 0, w * 0.3, h * 0.3, w * 0.6);
-      bg1.addColorStop(0, 'rgba(15,12,40,.4)');
+      bg1.addColorStop(0, 'rgba(25,15,45,.45)');
       bg1.addColorStop(1, 'transparent');
       ctx.fillStyle = bg1;
       ctx.fillRect(0, 0, w, h);
 
       const bg2 = ctx.createRadialGradient(w * 0.7, h * 0.7, 0, w * 0.7, h * 0.7, w * 0.5);
-      bg2.addColorStop(0, 'rgba(10,20,40,.3)');
+      bg2.addColorStop(0, 'rgba(20,10,35,.35)');
       bg2.addColorStop(1, 'transparent');
       ctx.fillStyle = bg2;
       ctx.fillRect(0, 0, w, h);
@@ -381,21 +381,21 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
         ctx.textAlign = 'center';
         const fs = Math.max(10, 12 / cam.zoom);
         ctx.font = `italic 400 ${fs}px "Cormorant Garamond"`;
-        ctx.fillStyle = `rgba(${cc.cat.r},${cc.cat.g},${cc.cat.b},.4)`;
+        ctx.fillStyle = `rgba(${cc.cat.r},${cc.cat.g},${cc.cat.b},.5)`;
         ctx.fillText(cc.name, cc.x, cc.y - Math.max(22, 34 / cam.zoom));
         const fs2 = Math.max(7, 8 / cam.zoom);
         ctx.font = `300 ${fs2}px "Noto Sans KR"`;
-        ctx.fillStyle = 'rgba(240,237,246,.18)';
+        ctx.fillStyle = 'rgba(248,244,255,.22)';
         ctx.fillText(cc.count + '개', cc.x, cc.y - Math.max(10, 19 / cam.zoom));
         ctx.restore();
       });
 
       ctx.restore();
 
-      // Vignette
+      // Vignette (warm tint)
       const vig = ctx.createRadialGradient(w / 2, h / 2, w * 0.25, w / 2, h / 2, w * 0.7);
       vig.addColorStop(0, 'transparent');
-      vig.addColorStop(1, 'rgba(6,8,26,.4)');
+      vig.addColorStop(1, 'rgba(12,8,24,.4)');
       ctx.fillStyle = vig;
       ctx.fillRect(0, 0, w, h);
     }
@@ -468,9 +468,9 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
       const rx = (mx - W() / 2) / cam.zoom - cam.x;
       const ry = (my - H() / 2) / cam.zoom - cam.y;
 
-      // Check stars first (generous 36px hit radius for mobile friendliness)
+      // Check stars first (generous 44px hit radius for mobile friendliness)
       let closestStar: UniverseStar | null = null;
-      let minDist = 36 / cam.zoom;
+      let minDist = 44 / cam.zoom;
       s.stars.forEach(star => {
         const d = Math.hypot(star.x - rx, star.y - ry);
         if (d < minDist) { minDist = d; closestStar = star; }
@@ -548,10 +548,10 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
       />
       {/* Category pills at top */}
       <div className="fixed top-0 left-0 right-0 z-[102] pointer-events-none"
-        style={{ background: 'linear-gradient(to bottom, rgba(6,8,26,.92) 40%, transparent)', padding: '12px 16px 22px' }}>
+        style={{ background: 'linear-gradient(to bottom, rgba(12,8,24,.92) 40%, transparent)', padding: '12px 16px 22px' }}>
         <div className="pointer-events-none" style={{ marginBottom: 7 }}>
-          <span className="font-brand italic" style={{ fontSize: '.85rem', color: 'rgba(240,237,246,.35)' }}>
-            <b className="not-italic font-normal" style={{ color: 'rgba(240,237,246,.55)' }}>@{username}</b>의 우주
+          <span className="font-brand italic" style={{ fontSize: '.85rem', color: 'rgba(248,244,255,.4)' }}>
+            <b className="not-italic font-normal" style={{ color: 'rgba(248,244,255,.6)' }}>@{username}</b>의 우주
           </span>
         </div>
         <div className="flex gap-1.5 overflow-x-auto pointer-events-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
@@ -561,9 +561,9 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
               onClick={() => zoomToClusterRef.current(cc.name)}
               className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer active:bg-white/[.05]"
               style={{
-                fontSize: '.72rem', fontWeight: 300, color: 'rgba(240,237,246,.4)',
+                fontSize: '.72rem', fontWeight: 300, color: 'rgba(248,244,255,.45)',
                 padding: '5px 11px', borderRadius: 20, whiteSpace: 'nowrap',
-                border: '1px solid rgba(255,255,255,.05)', background: 'rgba(255,255,255,.02)',
+                border: '1px solid rgba(210,160,200,.08)', background: 'rgba(210,160,200,.04)',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
@@ -575,9 +575,9 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
             onClick={resetCamera}
             className="flex-shrink-0 cursor-pointer active:bg-white/[.05]"
             style={{
-              fontSize: '.72rem', fontWeight: 300, color: 'rgba(240,237,246,.4)',
+              fontSize: '.72rem', fontWeight: 300, color: 'rgba(248,244,255,.45)',
               padding: '5px 11px', borderRadius: 20, whiteSpace: 'nowrap',
-              border: '1px solid rgba(255,255,255,.05)', background: 'rgba(255,255,255,.02)',
+              border: '1px solid rgba(210,160,200,.08)', background: 'rgba(210,160,200,.04)',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
