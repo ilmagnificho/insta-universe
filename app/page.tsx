@@ -1,99 +1,150 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function LandingPage() {
-  const [username, setUsername] = useState("");
-  const [error, setError] = useState("");
+  const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleaned = username.trim().replace(/^@/, "");
+  const handleSubmit = () => {
+    const cleaned = username.trim().replace(/^@/, '');
     if (!cleaned) {
-      setError("인스타그램 아이디를 입력해주세요");
+      setError('인스타그램 아이디를 입력해주세요');
       return;
     }
     if (!/^[a-zA-Z0-9._]{1,30}$/.test(cleaned)) {
-      setError("올바른 인스타그램 아이디를 입력해주세요");
+      setError('올바른 인스타그램 아이디를 입력해주세요');
       return;
     }
-    router.push(`/preview?username=${encodeURIComponent(cleaned)}`);
+    router.push(`/loading?username=${encodeURIComponent(cleaned)}`);
   };
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center px-4">
-      {/* Background decorative stars */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        {Array.from({ length: 50 }).map((_, i) => (
-          <span
-            key={i}
-            className="absolute block rounded-full bg-white"
-            style={{
-              width: `${1 + Math.random() * 2}px`,
-              height: `${1 + Math.random() * 2}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              opacity: 0.2 + Math.random() * 0.4,
-              animation: `twinkle ${3 + Math.random() * 4}s ease-in-out ${Math.random() * 5}s infinite`,
-            }}
-          />
-        ))}
+    <div
+      className="fixed inset-0 flex flex-col items-center justify-center"
+      style={{ background: 'radial-gradient(ellipse at 50% 35%, #0e1030, #06081a 75%)' }}
+    >
+      {/* Background orbs */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: 300, height: 300,
+            background: 'radial-gradient(circle, #9b7cc9, transparent)',
+            top: '8%', left: '-10%',
+            filter: 'blur(90px)', opacity: 0.1,
+            animation: 'orbFloat 15s ease-in-out infinite',
+          }}
+        />
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: 240, height: 240,
+            background: 'radial-gradient(circle, #7c9cc9, transparent)',
+            bottom: '12%', right: '-8%',
+            filter: 'blur(90px)', opacity: 0.1,
+            animation: 'orbFloat 12s 3s ease-in-out infinite reverse',
+          }}
+        />
       </div>
 
-      <div className="relative z-10 w-full max-w-md text-center">
-        {/* Logo / Title */}
-        <div className="mb-10">
-          <h1 className="mb-3 text-4xl font-bold tracking-tight">
-            <span className="bg-gradient-to-r from-[#7c5bf5] via-[#a78bfa] to-[#4fc3f7] bg-clip-text text-transparent">
-              Insta Universe
-            </span>
-          </h1>
-          <p className="text-lg text-white/60">
-            내 인스타그램으로 우주를 만든다
-          </p>
-        </div>
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center px-8 w-full">
+        <h1
+          className="font-brand font-light italic tracking-widest"
+          style={{
+            fontSize: 'clamp(1.8rem, 6.5vw, 3rem)',
+            color: 'rgba(240, 237, 246, .75)',
+            animation: 'fadeUp .9s .1s both',
+          }}
+        >
+          Insta Universe
+        </h1>
 
-        {/* Input Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <p
+          className="font-extralight text-xs mt-2"
+          style={{
+            color: 'rgba(240, 237, 246, .28)',
+            letterSpacing: '.02em',
+            animation: 'fadeUp .9s .3s both',
+          }}
+        >
+          내 인스타그램이 우주가 됩니다
+        </p>
+
+        <div
+          className="mt-9 w-full flex flex-col gap-2.5"
+          style={{ maxWidth: 300, animation: 'fadeUp .9s .5s both' }}
+        >
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
+            <span
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 font-brand"
+              style={{ fontSize: '.95rem', color: 'rgba(240, 237, 246, .12)' }}
+            >
               @
             </span>
             <input
-              type="text"
               value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                setError("");
-              }}
-              placeholder="인스타그램 아이디 입력"
-              className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-10 pr-4 text-center text-lg text-white placeholder-white/30 outline-none transition-all focus:border-[#7c5bf5]/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-[#7c5bf5]/20"
-              autoFocus
+              onChange={e => { setUsername(e.target.value); setError(''); }}
+              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+              placeholder="인스타그램 아이디"
               autoComplete="off"
               spellCheck={false}
+              className="w-full py-3.5 pl-8 pr-3.5 rounded-[10px] outline-none transition-all font-light"
+              style={{
+                background: 'rgba(255,255,255,.018)',
+                border: '1px solid rgba(255,255,255,.04)',
+                fontSize: '.84rem',
+                color: '#f0edf6',
+                WebkitAppearance: 'none',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = 'rgba(155,124,201,.2)';
+                e.target.style.boxShadow = '0 0 30px rgba(155,124,201,.04)';
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = 'rgba(255,255,255,.04)';
+                e.target.style.boxShadow = 'none';
+              }}
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-400">{error}</p>
+            <p className="text-center" style={{ fontSize: '.7rem', color: 'rgba(255,120,120,.6)' }}>
+              {error}
+            </p>
           )}
 
           <button
-            type="submit"
-            className="w-full rounded-2xl bg-gradient-to-r from-[#7c5bf5] to-[#6d4de8] py-4 text-lg font-semibold text-white shadow-lg shadow-[#7c5bf5]/25 transition-all hover:shadow-xl hover:shadow-[#7c5bf5]/30 active:scale-[0.98]"
+            onClick={handleSubmit}
+            className="py-3.5 rounded-[10px] font-light cursor-pointer transition-all active:scale-[0.98]"
+            style={{
+              background: 'rgba(155,124,201,.07)',
+              border: '1px solid rgba(155,124,201,.08)',
+              fontSize: '.82rem',
+              color: 'rgba(240,237,246,.55)',
+              letterSpacing: '.02em',
+              WebkitTapHighlightColor: 'transparent',
+            }}
           >
-            우주 만들기
+            나의 우주 만들기
           </button>
-        </form>
-
-        {/* Description */}
-        <div className="mt-12 space-y-3 text-sm text-white/40">
-          <p>공개 계정의 게시물을 AI로 분석하여</p>
-          <p>나만의 우주 비주얼을 만들어 드립니다</p>
         </div>
+
+        <p
+          className="mt-3 text-center leading-relaxed"
+          style={{
+            fontSize: '.58rem',
+            fontWeight: 200,
+            color: 'rgba(240,237,246,.12)',
+            animation: 'fadeUp .9s .6s both',
+          }}
+        >
+          공개 계정의 게시물을 AI가 분석하여<br />나만의 우주를 만들어 드려요
+        </p>
       </div>
-    </main>
+    </div>
   );
 }
