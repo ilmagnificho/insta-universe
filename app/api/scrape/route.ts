@@ -21,20 +21,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify payment is confirmed
+    // Verify payment is confirmed (skip in dev mode)
     const supabase = createServerClient();
-    const { data: payment } = await supabase
-      .from("payments")
-      .select("status")
-      .eq("order_id", orderId)
-      .eq("status", "confirmed")
-      .single();
+    const devMode = process.env.DEV_SKIP_PAYMENT === "true";
 
-    if (!payment) {
-      return NextResponse.json(
-        { error: "결제가 확인되지 않았습니다" },
-        { status: 403 }
-      );
+    if (!devMode) {
+      const { data: payment } = await supabase
+        .from("payments")
+        .select("status")
+        .eq("order_id", orderId)
+        .eq("status", "confirmed")
+        .single();
+
+      if (!payment) {
+        return NextResponse.json(
+          { error: "결제가 확인되지 않았습니다" },
+          { status: 403 }
+        );
+      }
     }
 
     // Scrape Instagram posts
