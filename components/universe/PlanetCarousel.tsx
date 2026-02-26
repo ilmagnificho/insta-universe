@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
+// useState is used in PlanetSlide for auto-hide hint
 import type { PostData, UniverseStar, ClusterCenter, Category } from '@/lib/types';
 import { CATEGORIES } from '@/lib/types';
 
@@ -148,6 +149,12 @@ function PlanetSlide({ planet, onStarTap, onPlanetTap }: {
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef(0);
+  const [showHint, setShowHint] = useState(true);
+  // Auto-hide hint card after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowHint(false), 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Pre-compute star orbital data
   const starOrbits = useMemo(() => {
@@ -578,8 +585,14 @@ function PlanetSlide({ planet, onStarTap, onPlanetTap }: {
         </p>
       </div>
 
-      {/* Hint card - more visible with pulsing glow */}
-      <div className="absolute z-10 left-5 right-5" style={{ bottom: '11%' }}>
+      {/* Hint card - auto-hides after 5s */}
+      <div className="absolute z-10 left-5 right-5" style={{
+        bottom: '11%',
+        opacity: showHint ? 1 : 0,
+        transform: showHint ? 'translateY(0)' : 'translateY(10px)',
+        transition: 'opacity .5s, transform .5s',
+        pointerEvents: showHint ? 'auto' : 'none',
+      }}>
         <div className="mx-auto rounded-2xl text-center" style={{
           maxWidth: 340, padding: '14px 18px',
           background: 'rgba(18,12,30,.8)',

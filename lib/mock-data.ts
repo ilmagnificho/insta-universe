@@ -130,18 +130,74 @@ export const STAR_INSIGHTS: Record<string, string[]> = {
   ],
 };
 
-// ===== Per-Post Unique Insight Generator =====
-export function getUniqueStarInsight(postId: number, catName: string, hour: number, _likes: number): string {
-  const catInsights = STAR_INSIGHTS[catName] || STAR_INSIGHTS['일상'];
-  const mainInsight = catInsights[postId % catInsights.length];
+// ===== Caption-Aware Insight Generator =====
+// Generates insights based on ACTUAL post content, not just category.
+// This prevents critical mismatches like "노을 사진" for a relationship diary post.
+
+// Caption-based insights (highest priority - most accurate)
+const CAPTION_INSIGHTS: { test: (cap: string) => boolean; insight: string }[] = [
+  { test: (c) => /친구|우정|10년|20년|지기/.test(c), insight: '오래된 관계를 소중히 여기는 마음이 느껴져요.\n\n시간이 지나도 변하지 않는 관계가 있다는 건,\n당신이 그만큼 좋은 사람이라는 증거.' },
+  { test: (c) => /인간관계|관계|멀어|가까워|소통/.test(c), insight: '관계에 대해 많이 생각하는 시기네요.\n\n사람들과의 거리를 조절하는 건 어렵지만,\n그 고민 자체가 성장이에요.' },
+  { test: (c) => /일기|다이어리|기록|회고|돌아보/.test(c), insight: '자기 자신과 대화하는 시간을 가지고 있네요.\n\n이런 기록은 나중에 돌아보면\n가장 귀한 선물이 될 거예요.' },
+  { test: (c) => /가을타|봄|여름|겨울|계절|날씨|날도/.test(c), insight: '계절의 변화에 민감한 사람.\n\n자연의 리듬에 맞춰 감성이 깊어지는 타입이에요.\n이 계절이 당신에게 어떤 의미인가요?' },
+  { test: (c) => /프리랜서|회사|직장|퇴근|출근|업무|작업/.test(c), insight: '일과 삶 사이에서 균형을 찾고 있는 중이네요.\n\n이 기록은 "나는 일만 하는 사람이 아니야"라는\n자신에게 보내는 메시지일 수 있어요.' },
+  { test: (c) => /축하|생일|기념|특별|처음/.test(c), insight: '특별한 순간을 기록으로 남기는 사람.\n\n이런 순간이 쌓여서 당신의 이야기가 되고 있어요.' },
+  { test: (c) => /감사|고마|행복|좋은|최고/.test(c), insight: '긍정적인 감정을 표현할 줄 아는 사람.\n\n이런 기록이 나중에 힘든 날\n당신을 지탱해주는 힘이 될 거예요.' },
+  { test: (c) => /힘든|지친|피곤|우울|슬프|외로/.test(c), insight: '솔직한 감정을 표현할 줄 아는 용기.\n\n괜찮지 않아도 괜찮다고 말할 수 있는 건\n강한 사람만이 할 수 있는 거예요.' },
+  { test: (c) => /브이로그|vlog|유튜브|콘텐츠/.test(c), insight: '자기 이야기를 세상과 나누고 있네요.\n\n보여주고 싶은 건 완벽한 모습이 아니라\n진짜 자신일 거예요.' },
+  { test: (c) => /새로|도전|시작|변화|결심/.test(c), insight: '변화를 두려워하지 않는 에너지가 느껴져요.\n\n새로운 시작은 항상 불안하지만,\n그 불안 너머에 성장이 있어요.' },
+  { test: (c) => /사랑|연인|커플|데이트|남친|여친/.test(c), insight: '사랑하는 사람과의 순간을 기록하고 있네요.\n\n이런 순간이 쌓여서 둘만의 이야기가 되는 거예요.' },
+  { test: (c) => /가족|엄마|아빠|부모|동생|언니|오빠|형|누나/.test(c), insight: '가족과의 시간을 소중히 여기는 마음이 느껴져요.\n\n이런 기록은 나중에 가장 따뜻한 기억이 될 거예요.' },
+];
+
+// Universal insights (always safe, never wrong about content)
+const UNIVERSAL_INSIGHTS: string[] = [
+  '이 순간을 굳이 기록한 이유가 있을 거예요.\n\n그날, 뭔가 남기고 싶은 마음이 있었죠?',
+  '이 기록에는 당신만 알 수 있는 감정이 담겨 있어요.\n\n글자 뒤에 숨겨진 진짜 이야기가 궁금해져요.',
+  '무심하게 올린 것처럼 보여도,\n사실은 그 순간이 의미 있었기 때문에 남긴 거예요.',
+  '기록하는 것 자체가 "이 순간은 특별했다"는 뜻이에요.\n\n당신은 일상에서 빛을 찾는 사람.',
+  '이 게시물을 다시 보면 그때의 감정이 떠오르죠?\n\n그게 바로 기록의 힘이에요.',
+  '누군가에게 "나 오늘 이랬어"라고 말하고 싶은 마음.\n그 대상이 팔로워이든, 특정한 사람이든.',
+  '이 한 장에 그날의 온도, 냄새, 기분이 다 담겨 있어요.\n\n사진은 감정의 타임캡슐.',
+];
+
+export function getUniqueStarInsight(postId: number, catName: string, hour: number, _likes: number, caption?: string): string {
   const timeNote = hour < 6
-    ? '\n\n새벽의 기록. 잠이 안 왔거나, 일찍 일어났거나. 어느 쪽이든, 그 시간의 당신은 가장 솔직한 상태였을 거예요.'
-    : hour < 10
-      ? '\n\n아침의 기록. 하루를 시작하는 에너지가 느껴져요.'
-      : hour >= 22
-        ? '\n\n밤늦은 기록. 하루의 끝에서 스스로와 대화하는 시간.'
-        : '';
-  return mainInsight + timeNote;
+    ? '\n\n새벽의 기록. 그 시간의 당신은 가장 솔직한 상태였을 거예요.'
+    : hour >= 22
+      ? '\n\n밤늦은 기록. 하루의 끝에서 자신과 대화하는 시간.'
+      : '';
+
+  // 1. Try caption-based insight first (most accurate, zero risk of mismatch)
+  if (caption) {
+    for (const ci of CAPTION_INSIGHTS) {
+      if (ci.test(caption)) {
+        return ci.insight + timeNote;
+      }
+    }
+  }
+
+  // 2. Category insight ONLY if caption clearly matches the category
+  //    This prevents "노을 사진" for a post about relationships
+  const catInsights = STAR_INSIGHTS[catName];
+  if (catInsights && caption) {
+    const catVerify: Record<string, RegExp> = {
+      '여행': /여행|travel|trip|공항|비행|호텔|리조트|해외|제주|부산|도쿄|오사카|발리|방콕|싱가포르|유럽|골목/i,
+      '음식': /음식|food|맛집|먹|요리|레시피|밥|파스타|치킨|피자|디저트|브런치|고기|삼겹|떡볶이/i,
+      '패션': /패션|fashion|style|ootd|코디|옷|착샷|룩|데일리룩|메이크업|뷰티|스니커즈|언박싱/i,
+      '운동': /운동|fitness|gym|workout|헬스|요가|필라테스|러닝|수영|크로스핏|등산|골프|WOD/i,
+      '카페': /카페|cafe|coffee|커피|라떼|아메리카노|에스프레소/i,
+      '야경': /야경|노을|sunset|sunrise|일출|밤하늘|별빛|루프탑|night.*view|별밤/i,
+      '반려동물': /강아지|고양이|반려|dog|cat|puppy|뭉이|댕댕|냥|pet/i,
+    };
+    const verify = catVerify[catName];
+    if (verify && verify.test(caption)) {
+      return catInsights[postId % catInsights.length] + timeNote;
+    }
+  }
+
+  // 3. Fallback: universal insight (always safe)
+  return UNIVERSAL_INSIGHTS[postId % UNIVERSAL_INSIGHTS.length] + timeNote;
 }
 
 // ===== Stability Patterns (Premium: 안정감의 패턴) =====

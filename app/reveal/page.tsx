@@ -15,7 +15,7 @@ function StarfieldBg() {
     if (!canvas) return;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const w = innerWidth;
-    const h = 3000; // tall for scrolling
+    const h = 2200; // match content height
     canvas.width = w * dpr;
     canvas.height = h * dpr;
     canvas.style.width = w + 'px';
@@ -379,7 +379,7 @@ function RevealContent() {
       <div
         className="mx-auto flex flex-col items-center text-center relative"
         style={{
-          maxWidth: 380, padding: '48px 22px 60px', zIndex: 1,
+          maxWidth: 380, padding: '48px 22px 24px', zIndex: 1,
           opacity: visible ? 1 : 0,
           transform: visible ? 'translateY(0)' : 'translateY(20px)',
           transition: 'opacity 1s .15s, transform 1s .15s',
@@ -653,7 +653,7 @@ function RevealContent() {
           내 우주 보러가기
         </button>
 
-        <p className="mt-2" style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(248,244,255,.25)' }}>
+        <p className="mt-2 mb-4" style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(248,244,255,.25)' }}>
           AI 심층 분석은 별도 구매
         </p>
       </div>
