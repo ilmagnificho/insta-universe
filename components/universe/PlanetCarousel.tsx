@@ -116,11 +116,26 @@ export default function PlanetCarousel({ posts, username, onStarTap, onClusterTa
         ))}
       </div>
 
-      <div className="fixed left-0 right-0 z-[100] text-center pointer-events-none" style={{ bottom: 62 }}>
-        <p style={{ fontSize: '.68rem', fontWeight: 300, color: 'rgba(248,244,255,.12)' }}>
-          ← 스와이프하여 행성 탐험 →
-        </p>
-      </div>
+      {/* Swipe arrows - animated */}
+      {planets.length > 1 && (
+        <div className="fixed left-0 right-0 z-[100] flex items-center justify-center gap-3 pointer-events-none" style={{ bottom: 58 }}>
+          {activeIndex > 0 && (
+            <span style={{
+              fontSize: '1rem', color: 'rgba(248,244,255,.2)',
+              animation: 'swipeHintLeft 1.5s ease-in-out infinite',
+            }}>&#8249;</span>
+          )}
+          <span style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(248,244,255,.25)' }}>
+            스와이프하여 {planets.length}개 행성 탐험
+          </span>
+          {activeIndex < planets.length - 1 && (
+            <span style={{
+              fontSize: '1rem', color: 'rgba(248,244,255,.2)',
+              animation: 'swipeHintRight 1.5s ease-in-out infinite',
+            }}>&#8250;</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -563,18 +578,41 @@ function PlanetSlide({ planet, onStarTap, onPlanetTap }: {
         </p>
       </div>
 
-      {/* Hint card */}
+      {/* Hint card - more visible with pulsing glow */}
       <div className="absolute z-10 left-5 right-5" style={{ bottom: '11%' }}>
         <div className="mx-auto rounded-2xl text-center" style={{
-          maxWidth: 340, padding: '12px 18px',
-          background: 'rgba(255,255,255,.03)',
+          maxWidth: 340, padding: '14px 18px',
+          background: 'rgba(18,12,30,.8)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255,255,255,.05)',
+          border: '1px solid rgba(210,160,200,.12)',
+          boxShadow: '0 0 20px rgba(210,160,200,.06)',
         }}>
-          <p className="font-light" style={{ fontSize: '.78rem', color: 'rgba(248,244,255,.3)', lineHeight: 1.5 }}>
-            별을 터치하면 AI 인사이트 · 행성을 터치하면 카테고리 분석
-          </p>
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="rounded-full" style={{
+                width: 6, height: 6,
+                background: 'rgba(255,255,255,.5)',
+                boxShadow: '0 0 8px rgba(255,255,255,.3)',
+                animation: 'pulse 2s ease-in-out infinite',
+              }} />
+              <span style={{ fontSize: '.75rem', fontWeight: 300, color: 'rgba(248,244,255,.5)' }}>
+                별 터치 = AI 인사이트
+              </span>
+            </div>
+            <span style={{ fontSize: '.6rem', color: 'rgba(248,244,255,.15)' }}>|</span>
+            <div className="flex items-center gap-1.5">
+              <span className="rounded-full" style={{
+                width: 10, height: 10,
+                background: `rgba(${planet.cat.r},${planet.cat.g},${planet.cat.b},.4)`,
+                boxShadow: `0 0 8px rgba(${planet.cat.r},${planet.cat.g},${planet.cat.b},.3)`,
+                animation: 'pulse 2s ease-in-out infinite .5s',
+              }} />
+              <span style={{ fontSize: '.75rem', fontWeight: 300, color: 'rgba(248,244,255,.5)' }}>
+                행성 터치 = 분석
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

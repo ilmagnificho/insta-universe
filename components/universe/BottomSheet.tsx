@@ -158,22 +158,33 @@ export function StarSheetContent({
 
   return (
     <>
-      {/* Post image */}
+      {/* Post image - uses proxy to bypass Instagram hotlink protection */}
       {post.displayUrl ? (
         <div style={{
-          width: '100%', aspectRatio: '1', borderRadius: 10,
+          width: '100%', aspectRatio: '4/3', borderRadius: 12,
           overflow: 'hidden', marginBottom: 14,
           background: `linear-gradient(135deg, rgba(${post.cat.r},${post.cat.g},${post.cat.b},.15), rgba(${post.cat.r},${post.cat.g},${post.cat.b},.05))`,
+          position: 'relative',
         }}>
           <img
-            src={post.displayUrl} alt=""
+            src={`/api/img-proxy?url=${encodeURIComponent(post.displayUrl)}`}
+            alt=""
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            onError={(e) => {
+              const el = e.target as HTMLImageElement;
+              // Fallback: try direct URL, then hide
+              if (!el.dataset.retried) {
+                el.dataset.retried = '1';
+                el.src = post.displayUrl!;
+              } else {
+                el.style.display = 'none';
+              }
+            }}
           />
         </div>
       ) : (
         <div style={{
-          width: '100%', height: 80, borderRadius: 10, marginBottom: 14,
+          width: '100%', height: 80, borderRadius: 12, marginBottom: 14,
           background: `linear-gradient(135deg, rgba(${post.cat.r},${post.cat.g},${post.cat.b},.12), rgba(${post.cat.r},${post.cat.g},${post.cat.b},.04))`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
