@@ -30,7 +30,6 @@ export default function InsightToast({ items, active, onShareClick }: Props) {
       if (!mounted) return;
 
       if (idx >= items.length) {
-        // Show share toast at the end
         setTimeout(() => {
           if (mounted) setShowShare(true);
         }, 500);
@@ -42,7 +41,6 @@ export default function InsightToast({ items, active, onShareClick }: Props) {
 
       setVisibleToasts(prev => [...prev, { ...item, id, show: false }]);
 
-      // Animate in
       setTimeout(() => {
         if (!mounted) return;
         setVisibleToasts(prev => prev.map(t => t.id === id ? { ...t, show: true } : t));
@@ -50,14 +48,11 @@ export default function InsightToast({ items, active, onShareClick }: Props) {
 
       idx++;
 
-      // Show next after delay, remove old ones
       setTimeout(() => {
         if (!mounted) return;
-        // Remove oldest if there are multiple
         setVisibleToasts(prev => {
           if (prev.length > 1) {
             const [oldest, ...rest] = prev;
-            // Fade out oldest
             setTimeout(() => {
               if (mounted) setVisibleToasts(r => r.filter(t => t.id !== oldest.id));
             }, 400);
@@ -81,20 +76,17 @@ export default function InsightToast({ items, active, onShareClick }: Props) {
     <div className="toast-stack">
       {visibleToasts.map(toast => (
         <div key={toast.id} className={`toast-item ${toast.show ? 'show' : ''}`}>
-          <p className="font-brand italic mb-0.5" style={{ fontSize: '.5rem', color: 'rgba(155,124,201,.3)', letterSpacing: '.04em' }}>
+          <p className="font-brand italic mb-1" style={{ fontSize: '.75rem', color: 'rgba(155,124,201,.5)', letterSpacing: '.04em' }}>
             {toast.label}
           </p>
-          <p className="font-light" style={{ fontSize: '.7rem', color: 'rgba(240,237,246,.42)', lineHeight: 1.55 }}>
+          <p className="font-light" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.6)', lineHeight: 1.6 }}>
             {toast.text}
           </p>
         </div>
       ))}
       {showShare && (
-        <div
-          className="toast-item show cursor-pointer"
-          onClick={onShareClick}
-        >
-          <p className="text-center" style={{ fontSize: '.7rem', fontWeight: 300, color: 'rgba(155,124,201,.35)' }}>
+        <div className="toast-item show cursor-pointer" onClick={onShareClick}>
+          <p className="text-center" style={{ fontSize: '.88rem', fontWeight: 300, color: 'rgba(155,124,201,.55)' }}>
             내 우주 카드 저장/공유
           </p>
         </div>

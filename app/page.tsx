@@ -27,36 +27,37 @@ export default function LandingPage() {
       style={{ background: 'radial-gradient(ellipse at 50% 35%, #0e1030, #06081a 75%)' }}
     >
       {/* Background orbs */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className="absolute rounded-full"
           style={{
-            width: 300, height: 300,
-            background: 'radial-gradient(circle, #9b7cc9, transparent)',
-            top: '8%', left: '-10%',
-            filter: 'blur(90px)', opacity: 0.1,
+            width: 400, height: 400,
+            background: 'radial-gradient(circle, rgba(155,124,201,.35), transparent 70%)',
+            top: '5%', left: '-15%',
+            filter: 'blur(80px)',
             animation: 'orbFloat 15s ease-in-out infinite',
           }}
         />
         <div
           className="absolute rounded-full"
           style={{
-            width: 240, height: 240,
-            background: 'radial-gradient(circle, #7c9cc9, transparent)',
-            bottom: '12%', right: '-8%',
-            filter: 'blur(90px)', opacity: 0.1,
+            width: 350, height: 350,
+            background: 'radial-gradient(circle, rgba(100,170,235,.25), transparent 70%)',
+            bottom: '8%', right: '-12%',
+            filter: 'blur(80px)',
             animation: 'orbFloat 12s 3s ease-in-out infinite reverse',
           }}
         />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center px-8 w-full">
+      <div className="relative z-10 flex flex-col items-center px-6 w-full" style={{ maxWidth: 380 }}>
         <h1
-          className="font-brand font-light italic tracking-widest"
+          className="font-brand font-light italic"
           style={{
-            fontSize: 'clamp(1.8rem, 6.5vw, 3rem)',
-            color: 'rgba(240, 237, 246, .75)',
+            fontSize: 'clamp(2.2rem, 8vw, 3.4rem)',
+            color: 'rgba(240, 237, 246, .92)',
+            letterSpacing: '.08em',
             animation: 'fadeUp .9s .1s both',
           }}
         >
@@ -64,10 +65,11 @@ export default function LandingPage() {
         </h1>
 
         <p
-          className="font-extralight text-xs mt-2"
+          className="mt-3 font-light"
           style={{
-            color: 'rgba(240, 237, 246, .28)',
-            letterSpacing: '.02em',
+            fontSize: '0.95rem',
+            color: 'rgba(240, 237, 246, .5)',
+            letterSpacing: '.03em',
             animation: 'fadeUp .9s .3s both',
           }}
         >
@@ -75,13 +77,13 @@ export default function LandingPage() {
         </p>
 
         <div
-          className="mt-9 w-full flex flex-col gap-2.5"
-          style={{ maxWidth: 300, animation: 'fadeUp .9s .5s both' }}
+          className="mt-12 w-full flex flex-col gap-3"
+          style={{ animation: 'fadeUp .9s .5s both' }}
         >
           <div className="relative">
             <span
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 font-brand"
-              style={{ fontSize: '.95rem', color: 'rgba(240, 237, 246, .12)' }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 font-brand"
+              style={{ fontSize: '1rem', color: 'rgba(240, 237, 246, .25)' }}
             >
               @
             </span>
@@ -92,40 +94,40 @@ export default function LandingPage() {
               placeholder="인스타그램 아이디"
               autoComplete="off"
               spellCheck={false}
-              className="w-full py-3.5 pl-8 pr-3.5 rounded-[10px] outline-none transition-all font-light"
+              className="w-full py-4 pl-10 pr-4 rounded-xl outline-none transition-all font-light"
               style={{
-                background: 'rgba(255,255,255,.018)',
-                border: '1px solid rgba(255,255,255,.04)',
-                fontSize: '.84rem',
+                background: 'rgba(255,255,255,.04)',
+                border: '1px solid rgba(255,255,255,.08)',
+                fontSize: '1rem',
                 color: '#f0edf6',
                 WebkitAppearance: 'none',
               }}
               onFocus={e => {
-                e.target.style.borderColor = 'rgba(155,124,201,.2)';
-                e.target.style.boxShadow = '0 0 30px rgba(155,124,201,.04)';
+                e.target.style.borderColor = 'rgba(155,124,201,.35)';
+                e.target.style.boxShadow = '0 0 40px rgba(155,124,201,.08)';
               }}
               onBlur={e => {
-                e.target.style.borderColor = 'rgba(255,255,255,.04)';
+                e.target.style.borderColor = 'rgba(255,255,255,.08)';
                 e.target.style.boxShadow = 'none';
               }}
             />
           </div>
 
           {error && (
-            <p className="text-center" style={{ fontSize: '.7rem', color: 'rgba(255,120,120,.6)' }}>
+            <p className="text-center" style={{ fontSize: '.85rem', color: 'rgba(255,120,120,.75)' }}>
               {error}
             </p>
           )}
 
           <button
             onClick={handleSubmit}
-            className="py-3.5 rounded-[10px] font-light cursor-pointer transition-all active:scale-[0.98]"
+            className="py-4 rounded-xl font-light cursor-pointer transition-all active:scale-[0.98]"
             style={{
-              background: 'rgba(155,124,201,.07)',
-              border: '1px solid rgba(155,124,201,.08)',
-              fontSize: '.82rem',
-              color: 'rgba(240,237,246,.55)',
-              letterSpacing: '.02em',
+              background: 'linear-gradient(135deg, rgba(155,124,201,.25), rgba(120,140,210,.2))',
+              border: '1px solid rgba(155,124,201,.2)',
+              fontSize: '1rem',
+              color: 'rgba(240,237,246,.85)',
+              letterSpacing: '.03em',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
@@ -134,11 +136,11 @@ export default function LandingPage() {
         </div>
 
         <p
-          className="mt-3 text-center leading-relaxed"
+          className="mt-8 text-center leading-relaxed"
           style={{
-            fontSize: '.58rem',
-            fontWeight: 200,
-            color: 'rgba(240,237,246,.12)',
+            fontSize: '.82rem',
+            fontWeight: 300,
+            color: 'rgba(240,237,246,.35)',
             animation: 'fadeUp .9s .6s both',
           }}
         >

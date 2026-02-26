@@ -13,6 +13,7 @@ import ShareOverlay from '@/components/universe/ShareOverlay';
 function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [text, setText] = useState('결제가 완료되었어요');
+  const [textVisible, setTextVisible] = useState(true);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,7 +30,6 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
     if (!cx) return;
     cx.scale(dpr, dpr);
 
-    // Create sparkle particles
     const mx = w / 2;
     const my = h / 2;
     const particles: {
@@ -38,24 +38,35 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
       life: number; dec: number;
     }[] = [];
 
-    for (let i = 0; i < 50; i++) {
+    // Many more particles, brighter, larger
+    for (let i = 0; i < 150; i++) {
       const a = Math.random() * Math.PI * 2;
-      const sp = Math.random() * 0.8 + 0.15;
+      const sp = Math.random() * 1.2 + 0.2;
       particles.push({
-        x: mx, y: my,
+        x: mx + (Math.random() - .5) * 30,
+        y: my + (Math.random() - .5) * 30,
         vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-        r: Math.random() * 0.8 + 0.2,
-        cr: 140 + Math.random() * 70,
-        cg: 110 + Math.random() * 60,
-        cb: 180 + Math.random() * 50,
-        life: 1, dec: Math.random() * 0.003 + 0.001,
+        r: Math.random() * 2 + 0.5,
+        cr: 130 + Math.random() * 80,
+        cg: 100 + Math.random() * 80,
+        cb: 170 + Math.random() * 60,
+        life: 1, dec: Math.random() * 0.004 + 0.001,
       });
     }
 
     let animId: number;
     function draw() {
-      cx!.fillStyle = 'rgba(6,8,26,0.025)';
+      cx!.fillStyle = 'rgba(6,8,26,0.03)';
       cx!.fillRect(0, 0, w, h);
+
+      // Central glow
+      const cg = cx!.createRadialGradient(mx, my, 0, mx, my, 80);
+      cg.addColorStop(0, 'rgba(155,124,201,.06)');
+      cg.addColorStop(1, 'transparent');
+      cx!.fillStyle = cg;
+      cx!.beginPath();
+      cx!.arc(mx, my, 80, 0, Math.PI * 2);
+      cx!.fill();
 
       let alive = false;
       particles.forEach(p => {
@@ -65,12 +76,20 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
         p.y += p.vy;
         p.life -= p.dec;
 
-        const g = cx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * p.life * 4);
-        g.addColorStop(0, `rgba(${p.cr},${p.cg},${p.cb},${p.life * 0.15})`);
+        // Larger, brighter glow
+        const g = cx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * p.life * 8);
+        g.addColorStop(0, `rgba(${p.cr},${p.cg},${p.cb},${p.life * 0.4})`);
+        g.addColorStop(0.4, `rgba(${p.cr},${p.cg},${p.cb},${p.life * 0.1})`);
         g.addColorStop(1, 'transparent');
         cx!.fillStyle = g;
         cx!.beginPath();
-        cx!.arc(p.x, p.y, p.r * p.life * 4, 0, Math.PI * 2);
+        cx!.arc(p.x, p.y, p.r * p.life * 8, 0, Math.PI * 2);
+        cx!.fill();
+
+        // White core
+        cx!.fillStyle = `rgba(255,255,255,${p.life * 0.6})`;
+        cx!.beginPath();
+        cx!.arc(p.x, p.y, p.r * p.life * 0.4, 0, Math.PI * 2);
         cx!.fill();
       });
 
@@ -79,22 +98,27 @@ function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
     animId = requestAnimationFrame(draw);
 
     const textTimeout = setTimeout(() => setText('우주의 잠금을 해제하고 있어요...'), 1200);
-    const completeTimeout = setTimeout(() => onComplete(), 2500);
+    const fadeTimeout = setTimeout(() => setTextVisible(false), 2200);
+    const completeTimeout = setTimeout(() => onComplete(), 2800);
 
     return () => {
       cancelAnimationFrame(animId);
       clearTimeout(textTimeout);
+      clearTimeout(fadeTimeout);
       clearTimeout(completeTimeout);
     };
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-[130] flex items-center justify-center" style={{ background: '#06081a' }}>
+    <div className="fixed inset-0 z-[130] flex items-center justify-center"
+      style={{ background: 'radial-gradient(ellipse at center, #0c0e28, #06081a)' }}>
       <canvas ref={canvasRef} className="fixed inset-0" />
-      <p className="relative z-10 font-brand italic font-light text-center" style={{
-        fontSize: '1rem', color: 'rgba(240,237,246,.3)',
-        animation: 'pulse 2s ease-in-out infinite',
-      }}>
+      <p className="relative z-10 font-brand italic font-light text-center transition-opacity duration-500"
+        style={{
+          fontSize: '1.15rem',
+          color: 'rgba(240,237,246,.7)',
+          opacity: textVisible ? 1 : 0,
+        }}>
         {text}
       </p>
     </div>
@@ -226,11 +250,14 @@ function UniverseContent() {
       {/* Onboarding overlay */}
       <div className={`onboarding ${showOnboarding ? 'show' : ''}`} onClick={handleDismissOnboarding}>
         <div className="onboarding-card">
-          <p className="font-light leading-relaxed mb-1.5" style={{ fontSize: '.76rem', color: 'rgba(240,237,246,.5)' }}>
-            별 하나가 게시물 하나예요<br />터치해서 AI가 읽은 순간을 확인해보세요
+          <p className="font-light leading-relaxed mb-2" style={{ fontSize: '.95rem', color: 'rgba(240,237,246,.75)' }}>
+            별 하나가 게시물 하나예요
           </p>
-          <p style={{ fontSize: '.54rem', fontWeight: 200, color: 'rgba(240,237,246,.13)' }}>
-            터치하면 넘어가요
+          <p className="font-light leading-relaxed mb-3" style={{ fontSize: '.85rem', color: 'rgba(240,237,246,.5)' }}>
+            터치해서 AI가 읽은 순간을 확인해보세요
+          </p>
+          <p style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>
+            아무 곳이나 터치하면 넘어가요
           </p>
         </div>
       </div>

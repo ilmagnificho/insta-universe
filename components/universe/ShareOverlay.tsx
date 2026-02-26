@@ -41,45 +41,45 @@ export default function ShareOverlay({ open, onClose, userType, topLikes, catego
     <div className={`share-overlay ${open ? 'show' : ''}`} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="share-card">
         <p className="font-brand italic" style={{
-          fontSize: '.52rem', letterSpacing: '.18em', textTransform: 'uppercase',
-          color: 'rgba(155,124,201,.25)', marginBottom: 10,
+          fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase',
+          color: 'rgba(155,124,201,.4)', marginBottom: 12,
         }}>
           my universe
         </p>
 
-        <p className="font-brand italic font-normal" style={{ fontSize: '1.2rem', color: 'rgba(240,237,246,.65)', marginBottom: 2 }}>
+        <p className="font-brand italic font-normal" style={{ fontSize: '1.4rem', color: 'rgba(240,237,246,.85)', marginBottom: 4 }}>
           {userType.type}
         </p>
 
-        <p style={{ fontSize: '.54rem', fontWeight: 200, color: 'rgba(155,124,201,.22)', marginBottom: 14 }}>
+        <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(155,124,201,.45)', marginBottom: 18 }}>
           {userType.rare} 유형
         </p>
 
-        <div className="grid grid-cols-2 gap-1.5 mb-3">
+        <div className="grid grid-cols-2 gap-2 mb-4">
           {stats.map((s, i) => (
-            <div key={i} className="rounded-md" style={{ padding: 6, background: 'rgba(255,255,255,.012)' }}>
-              <div className="font-brand" style={{ fontSize: '.85rem', color: 'rgba(240,237,246,.45)' }}>{s.n}</div>
-              <div style={{ fontSize: '.46rem', fontWeight: 200, color: 'rgba(240,237,246,.12)' }}>{s.l}</div>
+            <div key={i} className="rounded-lg" style={{ padding: '8px 6px', background: 'rgba(255,255,255,.025)' }}>
+              <div className="font-brand" style={{ fontSize: '1rem', color: 'rgba(240,237,246,.6)' }}>{s.n}</div>
+              <div style={{ fontSize: '.68rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>{s.l}</div>
             </div>
           ))}
         </div>
 
-        <p className="mb-2.5" style={{ fontSize: '.62rem', fontWeight: 200, color: 'rgba(240,237,246,.28)', lineHeight: 1.6 }}>
+        <p className="mb-3" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(240,237,246,.5)', lineHeight: 1.7 }}>
           {userType.insight}
         </p>
 
-        <p className="font-brand italic mb-3.5" style={{ fontSize: '.48rem', color: 'rgba(240,237,246,.06)', letterSpacing: '.1em' }}>
+        <p className="font-brand italic mb-4" style={{ fontSize: '.62rem', color: 'rgba(240,237,246,.12)', letterSpacing: '.1em' }}>
           insta-universe.com
         </p>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <button
             onClick={handleSaveCard}
-            className="rounded-lg cursor-pointer active:scale-[.98]"
+            className="rounded-xl cursor-pointer active:scale-[.98]"
             style={{
-              padding: 10, fontSize: '.7rem', fontWeight: 300,
-              background: 'rgba(155,124,201,.07)', color: 'rgba(240,237,246,.5)',
-              border: '1px solid rgba(155,124,201,.06)',
+              padding: 12, fontSize: '.88rem', fontWeight: 300,
+              background: 'rgba(155,124,201,.12)', color: 'rgba(240,237,246,.7)',
+              border: '1px solid rgba(155,124,201,.12)',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
@@ -87,11 +87,11 @@ export default function ShareOverlay({ open, onClose, userType, topLikes, catego
           </button>
           <button
             onClick={handleCopyLink}
-            className="rounded-lg cursor-pointer active:scale-[.98]"
+            className="rounded-xl cursor-pointer active:scale-[.98]"
             style={{
-              padding: 10, fontSize: '.7rem', fontWeight: 300,
-              background: 'transparent', color: 'rgba(240,237,246,.2)',
-              border: '1px solid rgba(255,255,255,.025)',
+              padding: 12, fontSize: '.88rem', fontWeight: 300,
+              background: 'transparent', color: 'rgba(240,237,246,.4)',
+              border: '1px solid rgba(255,255,255,.06)',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
@@ -100,36 +100,36 @@ export default function ShareOverlay({ open, onClose, userType, topLikes, catego
         </div>
 
         {/* Voyager section */}
-        <div className="mt-2.5 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,.02)' }}>
-          <p className="mb-1.5" style={{ fontSize: '.6rem', fontWeight: 200, color: 'rgba(240,237,246,.25)' }}>
+        <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,.05)' }}>
+          <p className="mb-2" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.4)' }}>
             궁금한 사람의 우주도 볼 수 있어요
           </p>
-          <div className="flex gap-1">
+          <div className="flex gap-1.5">
             <div className="flex-1 relative">
-              <span className="absolute left-2 top-1/2 -translate-y-1/2" style={{ fontSize: '.7rem', color: 'rgba(240,237,246,.1)' }}>@</span>
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.2)' }}>@</span>
               <input
                 value={voyagerUsername}
                 onChange={e => setVoyagerUsername(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleVoyager()}
                 placeholder="아이디"
-                className="w-full rounded-md outline-none"
+                className="w-full rounded-lg outline-none"
                 style={{
-                  padding: '7px 7px 7px 20px',
-                  background: 'rgba(255,255,255,.015)',
-                  border: '1px solid rgba(255,255,255,.025)',
-                  fontSize: '.68rem', fontWeight: 300, color: '#f0edf6',
+                  padding: '9px 9px 9px 24px',
+                  background: 'rgba(255,255,255,.03)',
+                  border: '1px solid rgba(255,255,255,.06)',
+                  fontSize: '.82rem', fontWeight: 300, color: '#f0edf6',
                   WebkitAppearance: 'none',
                 }}
               />
             </div>
             <button
               onClick={handleVoyager}
-              className="rounded-md cursor-pointer"
+              className="rounded-lg cursor-pointer"
               style={{
-                padding: '7px 10px',
-                background: 'rgba(155,124,201,.06)',
-                border: '1px solid rgba(155,124,201,.05)',
-                fontSize: '.6rem', color: 'rgba(240,237,246,.35)',
+                padding: '9px 14px',
+                background: 'rgba(155,124,201,.1)',
+                border: '1px solid rgba(155,124,201,.1)',
+                fontSize: '.78rem', color: 'rgba(240,237,246,.55)',
                 whiteSpace: 'nowrap',
               }}
             >

@@ -13,7 +13,6 @@ export default function BottomSheet({ open, onClose, children }: Props) {
     onClose();
   }, [onClose]);
 
-  // Close on Escape key
   useEffect(() => {
     if (!open) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -36,8 +35,7 @@ export default function BottomSheet({ open, onClose, children }: Props) {
   );
 }
 
-// ===== Pre-built bottom sheet content components =====
-
+// ===== Star detail sheet =====
 export function StarSheetContent({
   post,
   insight,
@@ -50,35 +48,35 @@ export function StarSheetContent({
 
   return (
     <>
-      <p style={{ fontSize: '.54rem', fontWeight: 200, color: 'rgba(240,237,246,.15)' }}>
+      <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.35)' }}>
         {dateStr} {timeLabel}
       </p>
-      <p className="font-light leading-relaxed my-1.5" style={{ fontSize: '.78rem', color: 'rgba(240,237,246,.45)' }}>
+      <p className="font-light leading-relaxed my-2" style={{ fontSize: '.95rem', color: 'rgba(240,237,246,.7)' }}>
         {post.caption}
       </p>
-      <div className="flex flex-wrap gap-0.5 mb-2">
+      <div className="flex flex-wrap gap-1 mb-2.5">
         {post.tags.map((tag, i) => (
           <span key={i} className="rounded-lg" style={{
-            fontSize: '.52rem', fontWeight: 200, padding: '2px 7px',
-            background: 'rgba(155,124,201,.03)', color: 'rgba(155,124,201,.3)',
+            fontSize: '.72rem', fontWeight: 300, padding: '3px 9px',
+            background: 'rgba(155,124,201,.06)', color: 'rgba(155,124,201,.5)',
           }}>
             {tag}
           </span>
         ))}
       </div>
-      <p style={{ fontSize: '.62rem', fontWeight: 200, color: 'rgba(240,237,246,.18)', marginBottom: 14 }}>
+      <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(240,237,246,.35)', marginBottom: 16 }}>
         <span style={{ color: post.cat.hex }}>&#9829;</span> {post.likes.toLocaleString()}
       </p>
-      <div style={{ height: 1, background: 'rgba(255,255,255,.025)', marginBottom: 14 }} />
+      <div style={{ height: 1, background: 'rgba(255,255,255,.05)', marginBottom: 16 }} />
       <div className="rounded-xl" style={{
-        padding: '14px 16px',
-        background: 'rgba(155,124,201,.02)',
-        borderLeft: '1.5px solid rgba(155,124,201,.08)',
+        padding: '16px 18px',
+        background: 'rgba(155,124,201,.04)',
+        borderLeft: '2px solid rgba(155,124,201,.15)',
       }}>
-        <p className="font-brand italic mb-1.5" style={{ fontSize: '.52rem', color: 'rgba(155,124,201,.3)', letterSpacing: '.06em' }}>
+        <p className="font-brand italic mb-2" style={{ fontSize: '.78rem', color: 'rgba(155,124,201,.5)', letterSpacing: '.06em' }}>
           AI가 읽은 이 순간
         </p>
-        <p className="font-light leading-relaxed" style={{ fontSize: '.74rem', color: 'rgba(240,237,246,.44)' }}
+        <p className="font-light leading-relaxed" style={{ fontSize: '.9rem', color: 'rgba(240,237,246,.65)', lineHeight: 1.8 }}
           dangerouslySetInnerHTML={{ __html: insight.replace(/\n/g, '<br/>') }}
         />
       </div>
@@ -86,6 +84,7 @@ export function StarSheetContent({
   );
 }
 
+// ===== Cluster detail sheet =====
 export function ClusterSheetContent({
   name,
   hex,
@@ -105,36 +104,36 @@ export function ClusterSheetContent({
 }) {
   return (
     <>
-      <p className="font-brand italic font-normal mb-0.5" style={{ fontSize: '1.1rem', color: hex }}>
+      <p className="font-brand italic font-normal mb-1" style={{ fontSize: '1.3rem', color: hex }}>
         {name}
       </p>
-      <p className="mb-3" style={{ fontSize: '.58rem', fontWeight: 200, color: 'rgba(240,237,246,.15)' }}>
-        {count}개 게시물 - {pct}%
+      <p className="mb-3.5" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(240,237,246,.35)' }}>
+        {count}개 게시물 · 전체의 {pct}%
       </p>
-      <div className="grid grid-cols-3 gap-1.5 mb-3.5">
+      <div className="grid grid-cols-3 gap-2 mb-4">
         {[
           { n: avgLikes, l: '평균 ♥' },
           { n: topLikes, l: '최고 ♥' },
           { n: `${pct}%`, l: '비중' },
         ].map((s, i) => (
           <div key={i} className="rounded-lg text-center" style={{
-            padding: 7, background: 'rgba(255,255,255,.01)', border: '1px solid rgba(255,255,255,.02)',
+            padding: '10px 6px', background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.05)',
           }}>
-            <div className="font-brand" style={{ fontSize: '.9rem', color: 'rgba(240,237,246,.4)' }}>{s.n}</div>
-            <div style={{ fontSize: '.46rem', fontWeight: 200, color: 'rgba(240,237,246,.12)' }}>{s.l}</div>
+            <div className="font-brand" style={{ fontSize: '1.05rem', color: 'rgba(240,237,246,.6)' }}>{s.n}</div>
+            <div style={{ fontSize: '.68rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>{s.l}</div>
           </div>
         ))}
       </div>
-      <div style={{ height: 1, background: 'rgba(255,255,255,.025)', marginBottom: 14 }} />
+      <div style={{ height: 1, background: 'rgba(255,255,255,.05)', marginBottom: 16 }} />
       <div className="rounded-xl" style={{
-        padding: '14px 16px',
-        background: 'rgba(155,124,201,.02)',
-        borderLeft: '1.5px solid rgba(155,124,201,.08)',
+        padding: '16px 18px',
+        background: 'rgba(155,124,201,.04)',
+        borderLeft: '2px solid rgba(155,124,201,.15)',
       }}>
-        <p className="font-brand italic mb-1.5" style={{ fontSize: '.52rem', color: 'rgba(155,124,201,.3)', letterSpacing: '.06em' }}>
+        <p className="font-brand italic mb-2" style={{ fontSize: '.78rem', color: 'rgba(155,124,201,.5)', letterSpacing: '.06em' }}>
           AI 인사이트
         </p>
-        <p className="font-light leading-relaxed" style={{ fontSize: '.74rem', color: 'rgba(240,237,246,.44)' }}>
+        <p className="font-light leading-relaxed" style={{ fontSize: '.9rem', color: 'rgba(240,237,246,.65)', lineHeight: 1.8 }}>
           {insight}
         </p>
       </div>
