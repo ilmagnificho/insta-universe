@@ -27,12 +27,14 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
     brightestStar: UniverseStar | null;
     cam: { x: number; y: number; zoom: number; tx: number; ty: number; tz: number };
     interaction: { isDragging: boolean; lastPt: { x: number; y: number } | null; tapStart: { x: number; y: number; t: number } | null; tapMoved: boolean; pinchDist: number };
+    tapPulse: { x: number; y: number; t: number; c: { r: number; g: number; b: number } } | null;
     animId: number;
   }>({
     stars: [], clusters: [], nebulae: [], dust: [], streams: [], edges: [],
     brightestStar: null,
     cam: { x: 0, y: 0, zoom: 1, tx: 0, ty: 0, tz: 1 },
     interaction: { isDragging: false, lastPt: null, tapStart: null, tapMoved: false, pinchDist: 0 },
+    tapPulse: null,
     animId: 0,
   });
 
@@ -355,6 +357,24 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
         }
       });
 
+      // Tap pulse ring feedback
+      if (s.tapPulse) {
+        const elapsed = t - s.tapPulse.t;
+        const progress = Math.min(elapsed / 600, 1);
+        if (progress < 1) {
+          const pr = 20 + progress * 40;
+          const pa = (1 - progress) * 0.35;
+          const pc = s.tapPulse.c;
+          ctx.strokeStyle = `rgba(${pc.r},${pc.g},${pc.b},${pa})`;
+          ctx.lineWidth = 1.5 * (1 - progress);
+          ctx.beginPath();
+          ctx.arc(s.tapPulse.x, s.tapPulse.y, pr, 0, Math.PI * 2);
+          ctx.stroke();
+        } else {
+          s.tapPulse = null;
+        }
+      }
+
       // Cluster labels
       s.clusters.forEach(cc => {
         ctx.save();
@@ -394,7 +414,12 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
       if (!s.interaction.isDragging || !s.interaction.lastPt) return;
       const dx = e.clientX - s.interaction.lastPt.x;
       const dy = e.clientY - s.interaction.lastPt.y;
-      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) s.interaction.tapMoved = true;
+      // Use total distance from tap start for more forgiving mobile tap detection
+      if (s.interaction.tapStart) {
+        const totalDx = e.clientX - s.interaction.tapStart.x;
+        const totalDy = e.clientY - s.interaction.tapStart.y;
+        if (Math.hypot(totalDx, totalDy) > 12) s.interaction.tapMoved = true;
+      }
       s.cam.tx += dx / s.cam.zoom;
       s.cam.ty += dy / s.cam.zoom;
       s.interaction.lastPt = { x: e.clientX, y: e.clientY };
@@ -403,8 +428,13 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
     const handlePointerUp = (e: PointerEvent) => {
       s.interaction.isDragging = false;
       s.interaction.lastPt = null;
-      if (!s.interaction.tapMoved && s.interaction.tapStart && Date.now() - s.interaction.tapStart.t < 300) {
-        handleTap(e.clientX, e.clientY);
+      // Check total distance from tap start + time for tap detection
+      const tap = s.interaction.tapStart;
+      if (tap && Date.now() - tap.t < 400) {
+        const totalDist = Math.hypot(e.clientX - tap.x, e.clientY - tap.y);
+        if (totalDist < 15) {
+          handleTap(e.clientX, e.clientY);
+        }
       }
       s.interaction.tapStart = null;
     };
@@ -438,15 +468,18 @@ export default function UniverseCanvas({ posts, username, onStarTap, onClusterTa
       const rx = (mx - W() / 2) / cam.zoom - cam.x;
       const ry = (my - H() / 2) / cam.zoom - cam.y;
 
-      // Check stars first
+      // Check stars first (generous 36px hit radius for mobile friendliness)
       let closestStar: UniverseStar | null = null;
-      let minDist = 24 / cam.zoom;
+      let minDist = 36 / cam.zoom;
       s.stars.forEach(star => {
         const d = Math.hypot(star.x - rx, star.y - ry);
         if (d < minDist) { minDist = d; closestStar = star; }
       });
-      if (closestStar) {
-        onStarTapRef.current?.(closestStar);
+      if (closestStar !== null) {
+        // Trigger tap pulse feedback
+        const tapped = closestStar as UniverseStar;
+        s.tapPulse = { x: tapped.x, y: tapped.y, t: performance.now(), c: tapped.post.cat };
+        onStarTapRef.current?.(tapped);
         return;
       }
 
