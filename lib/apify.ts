@@ -7,7 +7,7 @@ const client = new ApifyClient({
 
 const ACTOR_ID = "apify/instagram-post-scraper";
 const MAX_POSTS = 50;
-const TIMEOUT_SECS = 120;
+const TIMEOUT_SECS = 300;
 
 export interface ScrapeResult {
   success: boolean;
@@ -27,6 +27,7 @@ export async function scrapeInstagramPosts(
       },
       {
         timeout: TIMEOUT_SECS,
+        waitSecs: TIMEOUT_SECS,
       }
     );
 
