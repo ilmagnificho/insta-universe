@@ -42,33 +42,33 @@ export default function ShareOverlay({ open, onClose, userType, topLikes, catego
       <div className="share-card">
         <p className="font-brand italic" style={{
           fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase',
-          color: 'rgba(155,124,201,.4)', marginBottom: 12,
+          color: 'rgba(210,160,200,.4)', marginBottom: 12,
         }}>
           my universe
         </p>
 
-        <p className="font-brand italic font-normal" style={{ fontSize: '1.4rem', color: 'rgba(240,237,246,.85)', marginBottom: 4 }}>
+        <p className="font-brand italic font-normal" style={{ fontSize: '1.4rem', color: 'rgba(248,244,255,.85)', marginBottom: 4 }}>
           {userType.type}
         </p>
 
-        <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(155,124,201,.45)', marginBottom: 18 }}>
+        <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(210,160,200,.45)', marginBottom: 18 }}>
           {userType.rare} 유형
         </p>
 
         <div className="grid grid-cols-2 gap-2 mb-4">
           {stats.map((s, i) => (
             <div key={i} className="rounded-lg" style={{ padding: '8px 6px', background: 'rgba(255,255,255,.025)' }}>
-              <div className="font-brand" style={{ fontSize: '1rem', color: 'rgba(240,237,246,.6)' }}>{s.n}</div>
-              <div style={{ fontSize: '.68rem', fontWeight: 300, color: 'rgba(240,237,246,.3)' }}>{s.l}</div>
+              <div className="font-brand" style={{ fontSize: '1rem', color: 'rgba(248,244,255,.6)' }}>{s.n}</div>
+              <div style={{ fontSize: '.68rem', fontWeight: 300, color: 'rgba(248,244,255,.3)' }}>{s.l}</div>
             </div>
           ))}
         </div>
 
-        <p className="mb-3" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(240,237,246,.5)', lineHeight: 1.7 }}>
+        <p className="mb-3" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(248,244,255,.5)', lineHeight: 1.7 }}>
           {userType.insight}
         </p>
 
-        <p className="font-brand italic mb-4" style={{ fontSize: '.62rem', color: 'rgba(240,237,246,.12)', letterSpacing: '.1em' }}>
+        <p className="font-brand italic mb-4" style={{ fontSize: '.62rem', color: 'rgba(248,244,255,.12)', letterSpacing: '.1em' }}>
           insta-universe.com
         </p>
 
@@ -78,8 +78,8 @@ export default function ShareOverlay({ open, onClose, userType, topLikes, catego
             className="rounded-xl cursor-pointer active:scale-[.98]"
             style={{
               padding: 12, fontSize: '.88rem', fontWeight: 300,
-              background: 'rgba(155,124,201,.12)', color: 'rgba(240,237,246,.7)',
-              border: '1px solid rgba(155,124,201,.12)',
+              background: 'rgba(210,160,200,.12)', color: 'rgba(248,244,255,.7)',
+              border: '1px solid rgba(210,160,200,.12)',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
@@ -90,7 +90,7 @@ export default function ShareOverlay({ open, onClose, userType, topLikes, catego
             className="rounded-xl cursor-pointer active:scale-[.98]"
             style={{
               padding: 12, fontSize: '.88rem', fontWeight: 300,
-              background: 'transparent', color: 'rgba(240,237,246,.4)',
+              background: 'transparent', color: 'rgba(248,244,255,.4)',
               border: '1px solid rgba(255,255,255,.06)',
               WebkitTapHighlightColor: 'transparent',
             }}
@@ -101,12 +101,12 @@ export default function ShareOverlay({ open, onClose, userType, topLikes, catego
 
         {/* Voyager section */}
         <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,.05)' }}>
-          <p className="mb-2" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(240,237,246,.4)' }}>
+          <p className="mb-2" style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(248,244,255,.4)' }}>
             궁금한 사람의 우주도 볼 수 있어요
           </p>
           <div className="flex gap-1.5">
             <div className="flex-1 relative">
-              <span className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ fontSize: '.88rem', color: 'rgba(240,237,246,.2)' }}>@</span>
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.2)' }}>@</span>
               <input
                 value={voyagerUsername}
                 onChange={e => setVoyagerUsername(e.target.value)}
@@ -117,7 +117,7 @@ export default function ShareOverlay({ open, onClose, userType, topLikes, catego
                   padding: '9px 9px 9px 24px',
                   background: 'rgba(255,255,255,.03)',
                   border: '1px solid rgba(255,255,255,.06)',
-                  fontSize: '.82rem', fontWeight: 300, color: '#f0edf6',
+                  fontSize: '.82rem', fontWeight: 300, color: '#f8f4ff',
                   WebkitAppearance: 'none',
                 }}
               />
@@ -127,9 +127,9 @@ export default function ShareOverlay({ open, onClose, userType, topLikes, catego
               className="rounded-lg cursor-pointer"
               style={{
                 padding: '9px 14px',
-                background: 'rgba(155,124,201,.1)',
-                border: '1px solid rgba(155,124,201,.1)',
-                fontSize: '.78rem', color: 'rgba(240,237,246,.55)',
+                background: 'rgba(210,160,200,.1)',
+                border: '1px solid rgba(210,160,200,.1)',
+                fontSize: '.78rem', color: 'rgba(248,244,255,.55)',
                 whiteSpace: 'nowrap',
               }}
             >

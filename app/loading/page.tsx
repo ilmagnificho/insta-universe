@@ -50,13 +50,13 @@ function LoadingContent() {
 
   return (
     <div className="fixed inset-0 z-[110] flex flex-col items-center justify-center"
-      style={{ background: 'radial-gradient(ellipse at 50% 40%, #0e1030, #06081a 70%)' }}>
+      style={{ background: 'radial-gradient(ellipse at 50% 40%, #1a1038, #0c0818 70%)' }}>
 
       {/* Ambient glow */}
       <div className="absolute rounded-full"
         style={{
           width: 300, height: 300,
-          background: 'radial-gradient(circle, rgba(155,124,201,.15), transparent 70%)',
+          background: 'radial-gradient(circle, rgba(210,160,200,.15), transparent 70%)',
           filter: 'blur(60px)',
           animation: 'pulse 3s ease-in-out infinite',
         }}
@@ -64,7 +64,7 @@ function LoadingContent() {
 
       <div className="relative z-10 flex flex-col items-center">
         <p className="font-brand italic mb-6"
-          style={{ fontSize: '1.1rem', color: 'rgba(240,237,246,.5)', letterSpacing: '.06em' }}>
+          style={{ fontSize: '1.1rem', color: 'rgba(248,244,255,.5)', letterSpacing: '.06em' }}>
           @{username}
         </p>
 
@@ -72,13 +72,13 @@ function LoadingContent() {
           style={{ width: 160, height: 2, borderRadius: 1, background: 'rgba(255,255,255,.06)' }}>
           <div ref={fillRef} className="h-full" style={{
             width: 0, borderRadius: 1,
-            background: 'linear-gradient(90deg, rgba(155,124,201,.5), rgba(124,156,201,.5))',
+            background: 'linear-gradient(90deg, rgba(210,160,200,.5), rgba(124,156,201,.5))',
           }} />
         </div>
 
         <p className="font-light text-center" style={{
           fontSize: '0.95rem',
-          color: 'rgba(240,237,246,.55)',
+          color: 'rgba(248,244,255,.55)',
           transition: 'opacity .3s',
         }}>
           {message}
@@ -92,8 +92,8 @@ export default function LoadingPage() {
   return (
     <Suspense
       fallback={
-        <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#06081a' }}>
-          <p style={{ fontSize: '0.95rem', color: 'rgba(240,237,246,.45)', fontWeight: 300 }}>로딩 중...</p>
+        <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0c0818' }}>
+          <p style={{ fontSize: '0.95rem', color: 'rgba(248,244,255,.45)', fontWeight: 300 }}>로딩 중...</p>
         </div>
       }
     >

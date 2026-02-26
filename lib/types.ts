@@ -8,14 +8,14 @@ export interface Category {
 }
 
 export const CATEGORIES: Category[] = [
-  { name: '여행', r: 100, g: 180, b: 240, hex: '#64b4f0' },
-  { name: '음식', r: 240, g: 190, b: 120, hex: '#f0be78' },
-  { name: '일상', r: 180, g: 140, b: 230, hex: '#b48ce6' },
-  { name: '패션', r: 235, g: 130, b: 175, hex: '#eb82af' },
-  { name: '운동', r: 100, g: 220, b: 180, hex: '#64dcb4' },
-  { name: '카페', r: 130, g: 170, b: 235, hex: '#82aaeb' },
-  { name: '야경', r: 160, g: 120, b: 235, hex: '#a078eb' },
-  { name: '반려동물', r: 235, g: 180, b: 130, hex: '#ebb482' },
+  { name: '여행', r: 130, g: 200, b: 255, hex: '#82c8ff' },
+  { name: '음식', r: 255, g: 200, b: 130, hex: '#ffc882' },
+  { name: '일상', r: 200, g: 158, b: 240, hex: '#c89ef0' },
+  { name: '패션', r: 255, g: 142, b: 184, hex: '#ff8eb8' },
+  { name: '운동', r: 120, g: 232, b: 196, hex: '#78e8c4' },
+  { name: '카페', r: 138, g: 180, b: 255, hex: '#8ab4ff' },
+  { name: '야경', r: 168, g: 128, b: 240, hex: '#a880f0' },
+  { name: '반려동물', r: 255, g: 184, b: 138, hex: '#ffb88a' },
 ];
 
 // ===== Post Data =====

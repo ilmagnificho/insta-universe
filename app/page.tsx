@@ -24,7 +24,7 @@ export default function LandingPage() {
   return (
     <div
       className="fixed inset-0 flex flex-col items-center justify-center"
-      style={{ background: 'radial-gradient(ellipse at 50% 35%, #0e1030, #06081a 75%)' }}
+      style={{ background: 'radial-gradient(ellipse at 50% 35%, #1a1038, #0c0818 75%)' }}
     >
       {/* Background orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -32,7 +32,7 @@ export default function LandingPage() {
           className="absolute rounded-full"
           style={{
             width: 400, height: 400,
-            background: 'radial-gradient(circle, rgba(155,124,201,.35), transparent 70%)',
+            background: 'radial-gradient(circle, rgba(210,160,200,.35), transparent 70%)',
             top: '5%', left: '-15%',
             filter: 'blur(80px)',
             animation: 'orbFloat 15s ease-in-out infinite',
@@ -42,7 +42,7 @@ export default function LandingPage() {
           className="absolute rounded-full"
           style={{
             width: 350, height: 350,
-            background: 'radial-gradient(circle, rgba(100,170,235,.25), transparent 70%)',
+            background: 'radial-gradient(circle, rgba(138,180,255,.25), transparent 70%)',
             bottom: '8%', right: '-12%',
             filter: 'blur(80px)',
             animation: 'orbFloat 12s 3s ease-in-out infinite reverse',
@@ -56,7 +56,7 @@ export default function LandingPage() {
           className="font-brand font-light italic"
           style={{
             fontSize: 'clamp(2.2rem, 8vw, 3.4rem)',
-            color: 'rgba(240, 237, 246, .92)',
+            color: 'rgba(248, 244, 255, .92)',
             letterSpacing: '.08em',
             animation: 'fadeUp .9s .1s both',
           }}
@@ -68,7 +68,7 @@ export default function LandingPage() {
           className="mt-3 font-light"
           style={{
             fontSize: '0.95rem',
-            color: 'rgba(240, 237, 246, .5)',
+            color: 'rgba(248, 244, 255, .5)',
             letterSpacing: '.03em',
             animation: 'fadeUp .9s .3s both',
           }}
@@ -83,7 +83,7 @@ export default function LandingPage() {
           <div className="relative">
             <span
               className="absolute left-4 top-1/2 -translate-y-1/2 font-brand"
-              style={{ fontSize: '1rem', color: 'rgba(240, 237, 246, .25)' }}
+              style={{ fontSize: '1rem', color: 'rgba(248, 244, 255, .25)' }}
             >
               @
             </span>
@@ -99,12 +99,12 @@ export default function LandingPage() {
                 background: 'rgba(255,255,255,.04)',
                 border: '1px solid rgba(255,255,255,.08)',
                 fontSize: '1rem',
-                color: '#f0edf6',
+                color: '#f8f4ff',
                 WebkitAppearance: 'none',
               }}
               onFocus={e => {
-                e.target.style.borderColor = 'rgba(155,124,201,.35)';
-                e.target.style.boxShadow = '0 0 40px rgba(155,124,201,.08)';
+                e.target.style.borderColor = 'rgba(210,160,200,.35)';
+                e.target.style.boxShadow = '0 0 40px rgba(210,160,200,.08)';
               }}
               onBlur={e => {
                 e.target.style.borderColor = 'rgba(255,255,255,.08)';
@@ -123,10 +123,10 @@ export default function LandingPage() {
             onClick={handleSubmit}
             className="py-4 rounded-xl font-light cursor-pointer transition-all active:scale-[0.98]"
             style={{
-              background: 'linear-gradient(135deg, rgba(155,124,201,.25), rgba(120,140,210,.2))',
-              border: '1px solid rgba(155,124,201,.2)',
+              background: 'linear-gradient(135deg, rgba(210,160,200,.25), rgba(120,140,210,.2))',
+              border: '1px solid rgba(210,160,200,.2)',
               fontSize: '1rem',
-              color: 'rgba(240,237,246,.85)',
+              color: 'rgba(248,244,255,.85)',
               letterSpacing: '.03em',
               WebkitTapHighlightColor: 'transparent',
             }}
@@ -140,7 +140,7 @@ export default function LandingPage() {
           style={{
             fontSize: '.82rem',
             fontWeight: 300,
-            color: 'rgba(240,237,246,.35)',
+            color: 'rgba(248,244,255,.35)',
             animation: 'fadeUp .9s .6s both',
           }}
         >
