@@ -10,9 +10,10 @@ interface Props {
   topLikes: number;
   categoryCount: number;
   streakDays: number;
+  isPaid?: boolean;
 }
 
-export default function ShareOverlay({ open, onClose, userType, topLikes, categoryCount, streakDays }: Props) {
+export default function ShareOverlay({ open, onClose, userType, topLikes, categoryCount, streakDays, isPaid = true }: Props) {
   const [voyagerUsername, setVoyagerUsername] = useState('');
 
   const stats = [
@@ -64,8 +65,8 @@ export default function ShareOverlay({ open, onClose, userType, topLikes, catego
           ))}
         </div>
 
-        <p className="mb-3" style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(248,244,255,.5)', lineHeight: 1.7 }}>
-          {userType.insight}
+        <p className="mb-3" style={{ fontSize: '.82rem', fontWeight: 300, color: isPaid ? 'rgba(248,244,255,.5)' : 'rgba(210,160,200,.4)', lineHeight: 1.7 }}>
+          {isPaid ? userType.insight : '더 많은 비밀을 알고 싶다면?'}
         </p>
 
         <p className="font-brand italic mb-4" style={{ fontSize: '.62rem', color: 'rgba(248,244,255,.12)', letterSpacing: '.1em' }}>

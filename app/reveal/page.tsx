@@ -495,8 +495,7 @@ function RevealContent() {
         }}>
           <MiniUniverse posts={data.posts} />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2" style={{
-            backdropFilter: 'blur(3px)',
-            background: 'radial-gradient(ellipse at center, rgba(12,8,24,.05), rgba(12,8,24,.3) 80%)',
+            background: 'radial-gradient(ellipse at center, transparent 40%, rgba(12,8,24,.3) 80%)',
           }}>
             <p className="font-brand italic font-normal" style={{
               fontSize: '1.15rem', color: 'rgba(248,244,255,.75)',
@@ -609,22 +608,12 @@ function RevealContent() {
             </div>
             <div className="flex items-center gap-3 text-left rounded-xl" style={{
               padding: '14px 16px',
-              background: 'rgba(255,255,255,.015)',
-              border: '1px solid rgba(255,255,255,.05)',
-            }}>
-              <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
-              <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(248,244,255,.5)' }}>
-                인터랙티브 우주 탐색 + 카테고리별 딥 분석
-              </span>
-            </div>
-            <div className="flex items-center gap-3 text-left rounded-xl" style={{
-              padding: '14px 16px',
               background: 'rgba(210,160,200,.03)',
               border: '1px solid rgba(210,160,200,.08)',
             }}>
               <span style={{ fontSize: '1rem', opacity: 0.5 }}>🔒</span>
               <span className="font-light" style={{ fontSize: '.88rem', color: 'rgba(210,160,200,.5)' }}>
-                우주 성격 카드 + 공유 기능
+                우주 DNA 리포트 + 성격 심층 분석
               </span>
             </div>
           </div>
@@ -656,15 +645,11 @@ function RevealContent() {
             WebkitTapHighlightColor: 'transparent',
           }}
         >
-          우주 잠금 해제 — ₩4,900
+          내 우주 보러가기
         </button>
 
-        <p className="mt-2" style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(248,244,255,.2)' }}>
-          카카오페이 · 카드 결제
-        </p>
-
-        <p className="mt-1.5" style={{ fontSize: '.68rem', fontWeight: 200, color: 'rgba(248,244,255,.15)' }}>
-          결제 시뮬레이션 (바로 넘어갑니다)
+        <p className="mt-2" style={{ fontSize: '.72rem', fontWeight: 300, color: 'rgba(248,244,255,.25)' }}>
+          AI 심층 분석은 별도 구매
         </p>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useMemo, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   loadMockData, STAR_INSIGHTS, CLUSTER_INSIGHTS, CROSS_INSIGHTS,
   DEEP_PERSONALITY, ACHIEVEMENT_BADGES, MONTHLY_INSIGHTS, PERSONALITY_KEYWORDS,
@@ -13,6 +13,7 @@ import UniverseCanvas from '@/components/universe/UniverseCanvas';
 import BottomSheet, { StarSheetContent, ClusterSheetContent } from '@/components/universe/BottomSheet';
 import InsightToast from '@/components/universe/InsightToast';
 import ShareOverlay from '@/components/universe/ShareOverlay';
+import FloatingCTA from '@/components/universe/FloatingCTA';
 
 // ===== Unlock Animation =====
 function UnlockAnimation({ onComplete }: { onComplete: () => void }) {
@@ -570,10 +571,12 @@ function ExploreProgress({
   tapped,
   total,
   onDNAClick,
+  dnaLabel,
 }: {
   tapped: number;
   total: number;
   onDNAClick: () => void;
+  dnaLabel?: string;
 }) {
   const [show, setShow] = useState(false);
 
@@ -617,13 +620,13 @@ function ExploreProgress({
             style={{
               padding: '9px',
               fontSize: '.82rem', fontWeight: 300,
-              color: 'rgba(210,160,200,.6)',
-              background: 'rgba(210,160,200,.06)',
-              border: '1px solid rgba(210,160,200,.1)',
+              color: dnaLabel ? 'rgba(248,244,255,.7)' : 'rgba(210,160,200,.6)',
+              background: dnaLabel ? 'linear-gradient(135deg, rgba(210,160,200,.12), rgba(120,140,220,.1))' : 'rgba(210,160,200,.06)',
+              border: dnaLabel ? '1px solid rgba(210,160,200,.15)' : '1px solid rgba(210,160,200,.1)',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
-            우주 DNA 리포트 보기
+            {dnaLabel || '우주 DNA 리포트 보기'}
           </button>
         )}
       </div>
@@ -633,11 +636,13 @@ function ExploreProgress({
 
 // ===== Main Universe Page =====
 function UniverseContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const username = searchParams.get('username') || 'demo';
+  const isPaid = searchParams.get('paid') === 'true';
 
   const [data, setData] = useState<MockResult | null>(null);
-  const [phase, setPhase] = useState<'unlock' | 'explore'>('unlock');
+  const [phase, setPhase] = useState<'unlock' | 'explore'>(isPaid ? 'unlock' : 'explore');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [toastsActive, setToastsActive] = useState(false);
   const [showShare, setShowShare] = useState(false);
@@ -655,6 +660,26 @@ function UniverseContent() {
     if (stored) setData(stored);
   }, []);
 
+  // Free mode: trigger onboarding directly (no unlock animation)
+  useEffect(() => {
+    if (!isPaid && data) {
+      setTimeout(() => setShowOnboarding(true), 700);
+    }
+  }, [isPaid, data]);
+
+  // Handle free → paid transition (client-side navigation may not remount)
+  const prevIsPaid = useRef(isPaid);
+  useEffect(() => {
+    if (isPaid && !prevIsPaid.current) {
+      setPhase('unlock');
+    }
+    prevIsPaid.current = isPaid;
+  }, [isPaid]);
+
+  const handlePayment = useCallback(() => {
+    router.push(`/universe/demo?username=${encodeURIComponent(username)}&paid=true`);
+  }, [router, username]);
+
   const handleUnlockComplete = useCallback(() => {
     setPhase('explore');
     setTimeout(() => setShowOnboarding(true), 700);
@@ -662,8 +687,8 @@ function UniverseContent() {
 
   const handleDismissOnboarding = useCallback(() => {
     setShowOnboarding(false);
-    setToastsActive(true);
-  }, []);
+    if (isPaid) setToastsActive(true);
+  }, [isPaid]);
 
   // Star tap handler - enriched with unique per-star insights
   const handleStarTap = useCallback((star: UniverseStar) => {
@@ -696,10 +721,12 @@ function UniverseContent() {
         insight={insight}
         bonusInsight={bonusInsight}
         starRank={star.post.likes > 600 ? 'brightest' : star.post.likes > 300 ? 'bright' : undefined}
+        isPaid={isPaid}
+        onPayment={handlePayment}
       />
     );
     setBsOpen(true);
-  }, []);
+  }, [isPaid, handlePayment]);
 
   // Cluster tap handler - enriched
   const handleClusterTap = useCallback((cluster: ClusterCenter, stars: UniverseStar[]) => {
@@ -733,10 +760,12 @@ function UniverseContent() {
         insight={insight}
         crossInsight={crossInsight?.text}
         timeNote={timeNote}
+        isPaid={isPaid}
+        onPayment={handlePayment}
       />
     );
     setBsOpen(true);
-  }, []);
+  }, [isPaid, handlePayment]);
 
   // Toast items - more and richer
   const toastItems = useMemo(() => {
@@ -785,8 +814,8 @@ function UniverseContent() {
 
   return (
     <div className="fixed inset-0" style={{ background: '#0c0818' }}>
-      {/* Unlock animation phase */}
-      {phase === 'unlock' && <UnlockAnimation onComplete={handleUnlockComplete} />}
+      {/* Unlock animation phase (paid only) */}
+      {phase === 'unlock' && isPaid && <UnlockAnimation onComplete={handleUnlockComplete} />}
 
       {/* Universe canvas (always mounted, visible when exploring) */}
       <div style={{ opacity: phase === 'explore' ? 1 : 0, transition: 'opacity 1s' }}>
@@ -814,8 +843,30 @@ function UniverseContent() {
         </div>
       </div>
 
-      {/* Insight toasts */}
+      {/* Share button (both modes) */}
       {phase === 'explore' && !showDNA && (
+        <button
+          onClick={() => setShowShare(true)}
+          className="fixed z-[106] cursor-pointer active:scale-95"
+          style={{
+            top: 54, right: 16,
+            padding: '7px 14px',
+            fontSize: '.72rem', fontWeight: 300,
+            color: 'rgba(248,244,255,.35)',
+            background: 'rgba(18,12,30,.5)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255,255,255,.06)',
+            borderRadius: 16,
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          공유
+        </button>
+      )}
+
+      {/* Insight toasts (paid only) */}
+      {phase === 'explore' && isPaid && !showDNA && (
         <InsightToast
           items={toastItems}
           active={toastsActive}
@@ -828,7 +879,17 @@ function UniverseContent() {
         <ExploreProgress
           tapped={tappedStars.size}
           total={data.posts.length}
-          onDNAClick={() => setShowDNA(true)}
+          onDNAClick={isPaid ? () => setShowDNA(true) : handlePayment}
+          dnaLabel={isPaid ? undefined : 'AI 분석 잠금 해제 — ₩4,900'}
+        />
+      )}
+
+      {/* Floating payment CTA (free mode only) */}
+      {phase === 'explore' && !isPaid && !bsOpen && (
+        <FloatingCTA
+          onPayment={handlePayment}
+          starCount={data.posts.length}
+          offsetBottom={tappedStars.size > 0 ? 100 : 16}
         />
       )}
 
@@ -845,14 +906,17 @@ function UniverseContent() {
         topLikes={data.topLikes}
         categoryCount={data.categoryCount}
         streakDays={data.streakDays}
+        isPaid={isPaid}
       />
 
-      {/* Universe DNA Panel */}
-      <UniverseDNA
-        data={data}
-        open={showDNA}
-        onClose={() => setShowDNA(false)}
-      />
+      {/* Universe DNA Panel (paid only) */}
+      {isPaid && (
+        <UniverseDNA
+          data={data}
+          open={showDNA}
+          onClose={() => setShowDNA(false)}
+        />
+      )}
     </div>
   );
 }
