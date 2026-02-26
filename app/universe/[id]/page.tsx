@@ -850,26 +850,44 @@ function UniverseContent() {
         </div>
       </div>
 
-      {/* Share button (both modes) */}
+      {/* Navigation buttons */}
       {phase === 'explore' && !showDNA && (
-        <button
-          onClick={() => setShowShare(true)}
-          className="fixed z-[106] cursor-pointer active:scale-95"
-          style={{
-            top: 54, right: 16,
-            padding: '7px 14px',
-            fontSize: '.72rem', fontWeight: 300,
-            color: 'rgba(248,244,255,.35)',
-            background: 'rgba(18,12,30,.5)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255,255,255,.06)',
-            borderRadius: 16,
-            WebkitTapHighlightColor: 'transparent',
-          }}
-        >
-          공유
-        </button>
+        <div className="fixed z-[106] flex items-center gap-2" style={{ top: 54, right: 16 }}>
+          <button
+            onClick={() => router.push('/')}
+            className="cursor-pointer active:scale-95"
+            style={{
+              padding: '7px 14px',
+              fontSize: '.72rem', fontWeight: 300,
+              color: 'rgba(248,244,255,.35)',
+              background: 'rgba(18,12,30,.5)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,.06)',
+              borderRadius: 16,
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            &larr; 홈
+          </button>
+          <button
+            onClick={() => setShowShare(true)}
+            className="cursor-pointer active:scale-95"
+            style={{
+              padding: '7px 14px',
+              fontSize: '.72rem', fontWeight: 300,
+              color: 'rgba(248,244,255,.35)',
+              background: 'rgba(18,12,30,.5)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,.06)',
+              borderRadius: 16,
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            공유
+          </button>
+        </div>
       )}
 
       {/* Insight toasts (paid only) */}

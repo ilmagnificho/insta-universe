@@ -363,6 +363,20 @@ function RevealContent() {
         WebkitOverflowScrolling: 'touch',
       }}
     >
+      {/* Back button */}
+      <button
+        onClick={() => router.push('/')}
+        className="fixed top-0 left-0 z-[130] cursor-pointer"
+        style={{
+          padding: '16px 20px',
+          fontSize: '.85rem', fontWeight: 300, color: 'rgba(248,244,255,.35)',
+          background: 'none', border: 'none',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+      >
+        &larr; 홈
+      </button>
+
       <div
         className="mx-auto flex flex-col items-center text-center"
         style={{
