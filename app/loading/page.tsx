@@ -389,7 +389,7 @@ function LoadingContent() {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[110] flex flex-col items-center justify-center"
+    <div className="fixed inset-0 z-[110] flex flex-col items-center"
       style={{ background: 'radial-gradient(ellipse at 50% 40%, #1a1038, #0c0818 70%)' }}>
 
       {/* Animated constellation canvas */}
@@ -409,10 +409,10 @@ function LoadingContent() {
         &larr; 돌아가기
       </button>
 
-      <div className="relative z-10 flex flex-col items-center" style={{ maxWidth: 360, width: '100%', padding: '0 24px' }}>
+      <div className="relative z-10 flex flex-col items-center" style={{ maxWidth: 360, width: '100%', padding: '0 24px', marginTop: '18vh' }}>
         {/* Username */}
-        <p className="font-brand italic mb-5"
-          style={{ fontSize: '1.1rem', color: 'rgba(248,244,255,.5)', letterSpacing: '.06em' }}>
+        <p className="font-brand italic mb-8"
+          style={{ fontSize: '1.2rem', color: 'rgba(248,244,255,.5)', letterSpacing: '.06em' }}>
           @{username}
         </p>
 
@@ -489,7 +489,9 @@ function LoadingContent() {
           /* Normal loading state */
           <>
             {/* Phase indicator */}
-            <PhaseIndicator current={phase} />
+            <div className="mb-6">
+              <PhaseIndicator current={phase} />
+            </div>
 
             {/* Star counter */}
             {starCount > 0 && (

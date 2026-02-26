@@ -705,8 +705,8 @@ function UniverseContent() {
       return next;
     });
 
-    // Get unique insight for this specific star
-    const insight = getUniqueStarInsight(star.post.id, star.post.cat.name, star.post.hour, star.post.likes);
+    // Get unique insight for this specific star (caption-aware to prevent mismatches)
+    const insight = getUniqueStarInsight(star.post.id, star.post.cat.name, star.post.hour, star.post.likes, star.post.caption);
 
     // Deep insight for popular posts
     const deepInsights = DEEP_PERSONALITY[star.post.cat.name] || [];
@@ -890,8 +890,8 @@ function UniverseContent() {
         </div>
       )}
 
-      {/* Insight toasts (paid only) */}
-      {phase === 'explore' && !showDNA && (
+      {/* Insight toasts (paid only, hidden when bottom sheet or DNA open) */}
+      {phase === 'explore' && !showDNA && !bsOpen && (
         <InsightToast
           items={toastItems}
           active={toastsActive}
@@ -900,8 +900,8 @@ function UniverseContent() {
         />
       )}
 
-      {/* Star exploration progress */}
-      {phase === 'explore' && !bsOpen && !showDNA && !isTransitioning && tappedStars.size > 0 && (
+      {/* Star exploration progress - only when no other bottom overlay */}
+      {phase === 'explore' && !bsOpen && !showDNA && !isTransitioning && !toastsActive && tappedStars.size > 0 && (
         <ExploreProgress
           tapped={tappedStars.size}
           total={data.posts.length}
@@ -910,8 +910,8 @@ function UniverseContent() {
         />
       )}
 
-      {/* Floating payment CTA (free mode only) */}
-      {!isPaid && !isTransitioning && (
+      {/* Floating payment CTA (free mode only, hidden when other overlays active) */}
+      {!isPaid && !isTransitioning && !toastsActive && (
         <FloatingCTA
           visible={phase === 'explore' && !bsOpen}
           onPay={handlePayment}

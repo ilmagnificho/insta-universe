@@ -186,15 +186,11 @@ function categorizePost(caption: string, hashtags: string[]) {
       "cafe", "coffee", "coffeetime", "coffeelover", "coffeeshop", "instacoffee",
     ]],
     ["야경", [
-      "야경", "노을", "일출", "석양", "새벽", "뷰", "전망", "풍경", "자연", "꽃", "봄",
-      "여름", "가을", "겨울", "단풍", "벚꽃", "하늘", "구름", "루프탑", "별빛", "밤하늘",
-      "night", "nightview", "sunset", "sunrise", "view", "scenery", "landscape",
-      "nature", "sky", "clouds", "flowers", "cherry",
+      "야경", "노을", "일출", "석양", "루프탑", "별빛", "밤하늘", "밤바다", "야간",
+      "night", "nightview", "sunset", "sunrise",
     ], [
-      "야경", "노을", "일출", "풍경", "자연", "하늘", "꽃스타그램", "벚꽃",
-      "단풍", "풍경스타그램", "자연스타그램",
-      "sunset", "sunrise", "nightview", "landscape", "nature", "sky",
-      "naturephotography", "scenery",
+      "야경", "노을", "일출", "밤하늘", "야경스타그램",
+      "sunset", "sunrise", "nightview", "nightsky",
     ]],
     ["반려동물", [
       "강아지", "고양이", "반려", "멍멍", "야옹", "댕댕", "냥이", "뭉이", "산책",
@@ -224,7 +220,7 @@ function categorizePost(caption: string, hashtags: string[]) {
     ["운동", ["💪", "🏋️", "🏃", "🧘", "⛹️", "🏌️", "🏊", "🚴", "⚽", "🏀", "🎾", "⛳"]],
     ["카페", ["☕", "🍵", "🧋"]],
     ["패션", ["👗", "👠", "👜", "💄", "💅", "👒", "🧥", "👟", "🕶", "💍"]],
-    ["야경", ["🌅", "🌄", "🌃", "🌉", "🌌", "🌸", "🌺", "🌻", "🍂", "🍁", "❄️", "⭐"]],
+    ["야경", ["🌅", "🌄", "🌃", "🌉", "🌌"]],
   ];
 
   let bestCat = "일상";
@@ -257,9 +253,9 @@ function categorizePost(caption: string, hashtags: string[]) {
     }
   }
 
-  // Only classify as non-일상 if there's meaningful signal (score >= 1)
-  // Otherwise default to 일상
-  if (bestScore < 1) bestCat = "일상";
+  // Require at least score 2 for confident non-일상 classification
+  // A single ambiguous word match (score 1) is not enough
+  if (bestScore < 2) bestCat = "일상";
 
   return CATEGORIES.find((c) => c.name === bestCat) || CATEGORIES[2];
 }
